@@ -1,2 +1,3 @@
 # finec
-Financial computation library from Finec MGIMO
+
+Computational finance library from Finec MGIMO.
