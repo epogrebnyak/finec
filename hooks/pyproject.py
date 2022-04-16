@@ -12,6 +12,7 @@ from typing import Tuple
 AUTHOR_REGEX = re.compile(r"^(?P<name>[- .,\w\d'’\"()\{\}]+)(?: <(?P<email>.+?)>)?$")
 PATH = os.path.join("..", "pyproject.toml")
 
+
 def extract_author(s: str) -> Tuple[str, str]:
     m = AUTHOR_REGEX.match(s)
     name = m.group("name")
@@ -20,7 +21,7 @@ def extract_author(s: str) -> Tuple[str, str]:
 
 
 def get_toml(path=PATH):
-    return toml.load("path)["tool"]["poetry"]
+    return toml.load(path)["tool"]["poetry"]
 
 
 d = get_toml()
