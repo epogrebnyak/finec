@@ -26,3 +26,10 @@ def test_find():
             "marketprice_boardid": None,
         }
     ]
+
+
+def test_history_url():
+    assert (
+        moex.history_url("stock", "bonds", "TQCB", "RU000A0JTB96")
+        == "https://iss.moex.com/iss/history/engines/stock/markets/bonds/boards/TQCB/securities/RU000A0JTB96.json"
+    )
