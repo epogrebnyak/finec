@@ -5,7 +5,30 @@ def test_start():
     assert moex.start() == 1
 
 
-def test_find():
+def test_find_systema_bond():  # will expire
+    assert moex.find("СистемБ1P6") == [
+        {
+            "emitent_id": 2046,
+            "emitent_inn": "7703104630",
+            "emitent_okpo": "27987276",
+            "emitent_title": 'Публичное акционерное общество "Акционерная финансовая корпорация "Система"',
+            "gosreg": "4B02-06-01669-A-001P",
+            "group": "stock_bonds",
+            "id": 125886,
+            "is_traded": 1,
+            "isin": "RU000A0JXN21",
+            "marketprice_boardid": "TQCB",
+            "name": 'АФК "Система" ПАО БО-001P-06',
+            "primary_boardid": "TQCB",
+            "regnumber": "4B02-06-01669-A-001P",
+            "secid": "RU000A0JXN21",
+            "shortname": "СистемБ1P6",
+            "type": "exchange_bond",
+        }
+    ]
+
+
+def test_find_rusal_plant():
     assert moex.find("Саяногорский") == [
         {
             "id": 86531,
