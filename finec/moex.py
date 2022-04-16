@@ -128,11 +128,11 @@ class ValidColumns:
 
 
 def get_bonds():
-    return get_all("/iss/engines/stock/markets/bonds/securities")
+    return get("/iss/engines/stock/markets/bonds/securities")["securities"]
 
 
 def get_shares():
-    return get_all("/iss/engines/stock/markets/shares/securities")
+    return get("/iss/engines/stock/markets/shares/securities")["securities"]
 
 
 def stock_history(security, board="TQBR", columns=ValidColumns.history_stock):
