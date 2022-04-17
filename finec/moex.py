@@ -1,6 +1,10 @@
-from apimoex import ISSClient
-import requests
+from typing import Dict, Union
+
 import pandas as pd
+import requests
+from apimoex import ISSClient
+
+from pandas._libs.missing import NAType
 
 
 def start():
@@ -8,7 +12,8 @@ def start():
 
 
 def qualified(endpoint):
-    assert endpoint.startswith("/iss")
+    if not endpoint.startswith("/iss"):
+        raise ValueError(f"{endpoint} must start with '/iss'.")
     return "https://iss.moex.com" + endpoint + ".json"
 
 
@@ -24,30 +29,6 @@ def get_all(endpoint, param={}):
 
 def find(query_str: str):
     return get_all(endpoint="/iss/securities", param=dict(q=query_str))["securities"]
-
-
-def history_url(engine, market, board, security):
-    endpoint = (
-        f"/iss/history/engines/{engine}"
-        f"/markets/{market}"
-        f"/boards/{board}/"
-        f"securities/{security}"
-    )
-    return qualified(endpoint)
-
-
-def board_quote(engine, market, board, security, param={}):
-    endpoint = (
-        f"/iss/history/engines/{engine}"
-        f"/markets/{market}"
-        f"/boards/{board}/"
-        f"securities/{security}"
-    )
-    return get_all(endpoint, param)["history"]
-
-
-def history_column_param(columns):
-    return {"history.columns": ",".join(columns)}
 
 
 class ValidColumns:
@@ -105,7 +86,8 @@ class ValidColumns:
         "VOLUME",
         "MATDATE",
         "OFFERDATE",
-        "BUYBACKDATE" "DURATION",
+        "BUYBACKDATE",
+        "DURATION",
         "COUPONPERCENT",
         "COUPONVALUE",
         "ACCINT",
@@ -116,7 +98,8 @@ class ValidColumns:
 
     history_stock = [
         "TRADEDATE",
-        "BOARDID" "HIGH",
+        "BOARDID",
+        "HIGH",
         "LOW",
         "OPEN",
         "CLOSE",
@@ -127,36 +110,58 @@ class ValidColumns:
     ]
 
 
-def get_bonds():
-    return get("/iss/engines/stock/markets/bonds/securities")["securities"]
+def history_endpoint(engine, market, board, security):
+    return (
+        f"/iss/history/engines/{engine}"
+        f"/markets/{market}"
+        f"/boards/{board}/"
+        f"securities/{security}"
+    )
 
 
-def get_shares():
-    return get("/iss/engines/stock/markets/shares/securities")["securities"]
+def board_quote(engine, market, board, security, param={}):
+    endpoint = history_endpoint(engine, market, board, security)
+    return get_all(endpoint, param)["history"]
 
 
-def stock_history(security, board="TQBR", columns=ValidColumns.history_stock):
+def assert_date(s: str) -> str:
+    # date must be in YYYY-MM-DD format
+    return s
+
+
+def make_query_dict(columns, start, end):
     param = {}
     if columns:
-        param = history_column_param(columns)
+        param["history.columns"] = ",".join(columns)
+    if start:
+        param["from"] = assert_date(start)
+    if end:
+        param["till"] = assert_date(end)
+    return param
+
+
+def stock_history(
+    security, board="TQBR", columns=ValidColumns.history_stock, start=None, end=None
+):
+    param = make_query_dict(columns, start, end)
     return board_quote("stock", "shares", board, security, param)
 
 
-def bond_history(security, board="TQCB", columns=ValidColumns.history_bond):
-    param = {}
-    if columns:
-        param = history_column_param(columns)
+def bond_history(
+    security, board="TQCB", columns=ValidColumns.history_bond, start=None, end=None
+):
+    param = make_query_dict(columns, start, end)
     return board_quote("stock", "bonds", board, security, param)
 
 
-def as_date(s: str):
+def as_date(s: str) -> Union[pd.Timestamp, NAType]:
     try:
         return pd.Timestamp(s)
     except ValueError:
         return pd.NA
 
 
-def dataframe(json_dict):
+def dataframe(json_dict: Dict) -> pd.DataFrame:
     df = pd.DataFrame(json_dict)
     if "TRADEDATE" in df.columns:
         df["TRADEDATE"] = pd.to_datetime(df["TRADEDATE"])
@@ -166,3 +171,11 @@ def dataframe(json_dict):
         if col in df.columns:
             df[col] = df[col].map(as_date)
     return df
+
+
+def get_bonds():
+    return get("/iss/engines/stock/markets/bonds/securities")["securities"]
+
+
+def get_shares():
+    return get("/iss/engines/stock/markets/shares/securities")["securities"]

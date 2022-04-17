@@ -53,6 +53,50 @@ def test_find_rusal_plant():
 
 def test_history_url():
     assert (
-        moex.history_url("stock", "bonds", "TQCB", "RU000A0JTB96")
+        moex.qualified(moex.history_endpoint("stock", "bonds", "TQCB", "RU000A0JTB96"))
         == "https://iss.moex.com/iss/history/engines/stock/markets/bonds/boards/TQCB/securities/RU000A0JTB96.json"
     )
+
+
+def test_stock_history():
+    assert moex.stock_history(
+        security="MGNT",
+        board="TQBR",
+        columns=["SECID", "BOARDID", "TRADEDATE", "CLOSE", "VOLUME"],
+        start="2021-11-15",
+        end="2021-11-16",
+    ) == [
+        {
+            "SECID": "MGNT",
+            "BOARDID": "TQBR",
+            "TRADEDATE": "2021-11-15",
+            "CLOSE": 6499.5,
+            "VOLUME": 396331,
+        },
+        {
+            "SECID": "MGNT",
+            "BOARDID": "TQBR",
+            "TRADEDATE": "2021-11-16",
+            "CLOSE": 6551,
+            "VOLUME": 304449,
+        },
+    ]
+
+
+def test_bond_history():
+    assert moex.bond_history(
+        security="RU000A101NJ6",
+        board="TQIR",
+        columns=["SECID", "BOARDID", "TRADEDATE", "CLOSE", "YIELDCLOSE", "MATDATE"],
+        start="2022-04-15",
+        end="2022-04-15",
+    ) == [
+        {
+            "SECID": "RU000A101NJ6",
+            "BOARDID": "TQIR",
+            "TRADEDATE": "2022-04-15",
+            "CLOSE": 79.5,
+            "YIELDCLOSE": 23.05,
+            "MATDATE": "2025-05-08",
+        }
+    ]
