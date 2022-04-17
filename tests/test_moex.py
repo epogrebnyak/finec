@@ -5,6 +5,29 @@ def test_start():
     assert moex.start() == 1
 
 
+def find_by_secid():  # will expire
+    assert moex.find("RU000A101NJ6") == [
+        {
+            "id": 384526849,
+            "secid": "RU000A101NJ6",
+            "shortname": "ЧЗПСНП БП2",
+            "regnumber": "4B02-02-45194-D-001P",
+            "name": "ЧЗПСН-Профнастил ПАО БО-П02",
+            "isin": "RU000A101NJ6",
+            "is_traded": 1,
+            "emitent_id": 2578,
+            "emitent_title": 'Публичное акционерное общество "Челябинский завод профилированного стального настила"',
+            "emitent_inn": "7447014976",
+            "emitent_okpo": "01217836",
+            "gosreg": "4B02-02-45194-D-001P",
+            "type": "exchange_bond",
+            "group": "stock_bonds",
+            "primary_boardid": "TQIR",
+            "marketprice_boardid": "TQIR",
+        }
+    ]
+
+
 def test_find_systema_bond():  # will expire
     assert moex.find("СистемБ1P6") == [
         {
@@ -28,7 +51,7 @@ def test_find_systema_bond():  # will expire
     ]
 
 
-def test_find_rusal_plant(): # not traded
+def test_find_rusal_plant():  # not traded
     assert moex.find("Саяногорский") == [
         {
             "id": 86531,
