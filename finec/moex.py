@@ -7,6 +7,16 @@ from apimoex import ISSClient
 from pandas._libs.missing import NAType
 
 
+__all__ = [
+    "find",
+    "stock_history",
+    "bond_history",
+    "get_bonds",
+    "get_shares",
+    "dataframe",
+]
+
+
 def start():
     return 1
 
@@ -154,6 +164,13 @@ def bond_history(
     return board_quote("stock", "bonds", board, security, param)
 
 
+def currency_history():
+    # https://iss.moex.com/iss/engines/currency/markets/selt/boards/CETS/securities
+    # USD000UTSTOM
+    # https://www.moex.com/s135
+    pass
+
+
 def as_date(s: str) -> Union[pd.Timestamp, NAType]:
     try:
         return pd.Timestamp(s)
@@ -179,3 +196,7 @@ def get_bonds():
 
 def get_shares():
     return get("/iss/engines/stock/markets/shares/securities")["securities"]
+
+
+def get_currencies():  # not tested
+    return get("/iss/engines/currency/markets/selt/securities")["securities"]
