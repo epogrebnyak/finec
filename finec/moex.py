@@ -42,8 +42,11 @@ def get_all(endpoint, param={}):
         return ISSClient(session, qualified(endpoint), param).get_all()
 
 
-def find(query_str: str):
-    return get_all(endpoint="/iss/securities", param=dict(q=query_str))["securities"]
+def find(query_str: str, is_traded=True):
+    # limits output to 100
+    param = dict(q=query_str)
+    param["is_trading"] = ("1" if is_traded else "0")
+    return get_all(endpoint="/iss/securities", param=param)["securities"]
 
 
 class ValidColumns:
