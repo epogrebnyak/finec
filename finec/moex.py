@@ -11,8 +11,13 @@ __all__ = [
     "find",
     "stock_history",
     "bond_history",
+    "currency_history",
     "get_bonds",
     "get_shares",
+    "get_currencies",
+    "usd_rur",
+    "eur_rur",
+    "cny_rur",
     "dataframe",
 ]
 
@@ -81,6 +86,19 @@ class ValidColumns:
         "PREVDATE",
         "PREVPRICE",
         "YIELDATPREVWAPRICE",
+    ]
+
+    security_currency = [
+        "SECID",
+        "BOARDID",
+        "MARKETCODE",
+        "SECNAME",
+        "SHORTNAME",
+        "SETTLEDATE",
+        "PREVPRICE",
+        "PREVWAPRICE",
+        "PREVDATE",
+        "CURRENCYID",
     ]
 
     history_bond = [
@@ -164,11 +182,29 @@ def bond_history(
     return board_quote("stock", "bonds", board, security, param)
 
 
-def currency_history():
+def currency_history(security, board="CETS", columns=None, start=None, end=None):
     # https://iss.moex.com/iss/engines/currency/markets/selt/boards/CETS/securities
-    # USD000UTSTOM
     # https://www.moex.com/s135
-    pass
+    param = make_query_dict(columns, start, end)
+    return board_quote("currency", "selt", board, security, param)
+
+
+def usd_rur(columns=None, start=None, end=None):
+    return currency_history(
+        security="USD000UTSTOM", columns=columns, start=start, end=end
+    )
+
+
+def eur_rur(columns=None, start=None, end=None):
+    return currency_history(
+        security="EUR_RUB__TOM", columns=columns, start=start, end=end
+    )
+
+
+def cny_rur(columns=None, start=None, end=None):
+    return currency_history(
+        security="CNYRUB_TOM", columns=columns, start=start, end=end
+    )
 
 
 def as_date(s: str) -> Union[pd.Timestamp, NAType]:
@@ -200,3 +236,4 @@ def get_shares():
 
 def get_currencies():  # not tested
     return get("/iss/engines/currency/markets/selt/securities")["securities"]
+

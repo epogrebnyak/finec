@@ -123,3 +123,23 @@ def test_bond_history():
             "MATDATE": "2025-05-08",
         }
     ]
+
+
+def test_currency_history():
+    assert moex.currency_history(
+        "EUR_RUB__TOM", board="CETS", columns=None, start="2022-04-01", end="2022-04-01"
+    ) == [
+        {
+            "BOARDID": "CETS",
+            "TRADEDATE": "2022-04-01",
+            "SHORTNAME": "EURRUB_TOM",
+            "SECID": "EUR_RUB__TOM",
+            "OPEN": 92.5,
+            "LOW": 92.0375,
+            "HIGH": 93.4675,
+            "CLOSE": 92.99,
+            "NUMTRADES": 5084,
+            "VOLRUR": 37229929467.5,
+            "WAPRICE": 92.5572,
+        }
+    ]
