@@ -28,7 +28,7 @@ def test_find_systema_bond():  # will expire
     ]
 
 
-def test_find_rusal_plant():
+def test_find_rusal_plant(): # not traded
     assert moex.find("Саяногорский") == [
         {
             "id": 86531,
