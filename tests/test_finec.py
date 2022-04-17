@@ -1,5 +1,5 @@
-from finec import __version__
+from finec import start
 
 
-def test_version():
-    assert __version__ == "0.0.0"
+def test_start():
+    assert start() == 1

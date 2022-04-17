@@ -1,10 +1,6 @@
 from finec import moex
 
 
-def test_start():
-    assert moex.start() == 1
-
-
 def find_by_secid():  # will expire
     assert moex.find("RU000A101NJ6") == [
         {
@@ -141,5 +137,30 @@ def test_currency_history():
             "NUMTRADES": 5084,
             "VOLRUR": 37229929467.5,
             "WAPRICE": 92.5572,
+        }
+    ]
+
+
+def test_index_history():
+    assert moex.index_history("IMOEX", start="2022-04-01", end="2022-04-01") == [
+        {
+            "BOARDID": "SNDX",
+            "SECID": "IMOEX",
+            "TRADEDATE": "2022-04-01",
+            "SHORTNAME": "Индекс МосБиржи",
+            "NAME": "Индекс МосБиржи",
+            "CLOSE": 2759.64,
+            "OPEN": 2714.62,
+            "HIGH": 2817.72,
+            "LOW": 2714.62,
+            "VALUE": 77972322862.8,
+            "DURATION": 0,
+            "YIELD": 0,
+            "DECIMALS": 2,
+            "CAPITALIZATION": 13646014592832.201,
+            "CURRENCYID": "RUB",
+            "DIVISOR": 4944847155.0997,
+            "TRADINGSESSION": "3",
+            "VOLUME": None,
         }
     ]

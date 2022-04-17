@@ -22,10 +22,6 @@ __all__ = [
 ]
 
 
-def start():
-    return 1
-
-
 def qualified(endpoint):
     if not endpoint.startswith("/iss"):
         raise ValueError(f"{endpoint} must start with '/iss'.")
@@ -45,7 +41,7 @@ def get_all(endpoint, param={}):
 def find(query_str: str, is_traded=True):
     # limits output to 100
     param = dict(q=query_str)
-    param["is_trading"] = ("1" if is_traded else "0")
+    param["is_trading"] = "1" if is_traded else "0"
     return get_all(endpoint="/iss/securities", param=param)["securities"]
 
 
@@ -106,7 +102,8 @@ class ValidColumns:
 
     history_bond = [
         "TRADEDATE",
-        "BOARDID" "HIGH",
+        "BOARDID",
+        "HIGH",
         "LOW",
         "OPEN",
         "CLOSE",
@@ -156,7 +153,7 @@ def board_quote(engine, market, board, security, param={}):
 
 
 def assert_date(s: str) -> str:
-    # date must be in YYYY-MM-DD format
+    # date must be in YYYY-MM-DD format, pass now without check
     return s
 
 
@@ -190,6 +187,14 @@ def currency_history(security, board="CETS", columns=None, start=None, end=None)
     # https://www.moex.com/s135
     param = make_query_dict(columns, start, end)
     return board_quote("currency", "selt", board, security, param)
+
+
+def index_history(
+    security, board="SNDX", columns=None, start=None, end=None
+):  # not tested
+    # index_history("IMOEX")
+    param = make_query_dict(columns, start, end)
+    return board_quote("stock", "index", board, security, param)
 
 
 def usd_rur(columns=None, start=None, end=None):
@@ -233,6 +238,10 @@ def get_bonds():
     return get("/iss/engines/stock/markets/bonds/securities")["securities"]
 
 
+def get_bond_yields():
+    return get("/iss/engines/stock/markets/bonds/securities")["marketdata_yields"]
+
+
 def get_shares():
     return get("/iss/engines/stock/markets/shares/securities")["securities"]
 
@@ -240,3 +249,6 @@ def get_shares():
 def get_currencies():  # not tested
     return get("/iss/engines/currency/markets/selt/securities")["securities"]
 
+
+def get_indices():
+    return get("/iss/engines/stock/markets/index/securities")["securities"]
