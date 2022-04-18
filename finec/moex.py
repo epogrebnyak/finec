@@ -248,11 +248,14 @@ class Market:
     def boards(self):
         pass
 
+DEFAULT_HISTORY_COLUMNS = dict(stocks=[], bonds=[])
+DEFAULT_BOARD_COLUMNS = dict(stocks=[], bonds=[])
+
 @dataclass
 class Board:
     engine: str
     market: str
-    board: str 
+    board: str
 
     # Both securities() and history_latest() will have quotes, but different column set
     def securities(self):
