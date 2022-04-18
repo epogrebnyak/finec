@@ -3,9 +3,8 @@ from typing import Dict, Union
 import pandas as pd
 import requests
 from apimoex import ISSClient
-
 from pandas._libs.missing import NAType
-
+from typing import List, Optional
 
 __all__ = [
     "find",
@@ -233,23 +232,48 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
             df[col] = df[col].map(as_date)
     return df
 
-# maybe use a dataclass  
+
+# maybe use a dataclass
 from dataclasses import dataclass
+
 
 @dataclass
 class Market:
     engine: str
     market: str
 
-    # Will list securities by different boards
+    @property
+    def endpoint(self):
+        return f"/iss/engines/{self.engine}/markets/{self.market}"
+
+    def describe(self):
+        return get(self.endpoint)
+
+    def securities(self) -> Dict:
+        return get(self.endpoint + "/securities")
+
+    def columns(self) -> Dict:
+        # must select key in output dict
+        return get(self.endpoint + "/securities/columns")
+
+    def boards(self) -> List:
+        return get(self.endpoint + "/boards")["boards"]
+
+
+class MarketHistory(Market):
+    engine: str
+    market: str
+
+    @property
+    def endpoint(self):
+        return f"/iss/history/engines/{self.engine}/markets/{self.market}"
+
+    def columns(self) -> Dict:
+        return get(self.endpoint + "/securities/columns")["history"]
+
     def securities(self):
-        pass
+        return get(self.endpoint + "/securities")
 
-    def boards(self):
-        pass
-
-DEFAULT_HISTORY_COLUMNS = dict(stocks=[], bonds=[])
-DEFAULT_BOARD_COLUMNS = dict(stocks=[], bonds=[])
 
 @dataclass
 class Board:
@@ -257,27 +281,86 @@ class Board:
     market: str
     board: str
 
-    # Both securities() and history_latest() will have quotes, but different column set
+    @property
+    def endpoint(self):
+        return f"/iss/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
+
+    def describe(self):
+        return get(self.endpoint)
+
     def securities(self):
-        pass
-
-    def history_latest(self):
-        pass
-
-    def yield_latest(self):
-        pass
-
-    def history(self, security: str, start: None, end: None):
-        pass
+        return get(self.endpoint + "/securities")
 
 
-#TQCB, TQOB
-#state_bonds = Board(engine="stock", market="bonds", board="TQCB")
-#corp_bonds = Board(engine="stock", market="bonds", board="TQ0B")
+@dataclass
+class BoardHistory:
+    engine: str
+    market: str
+    board: str
+
+    @property
+    def endpoint(self):
+        return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
+
+    def securities(self):
+        return get_all(self.endpoint + "/securities")["history"]
+
+
+def describe(ticker):
+    return get(f"/iss/securities/{ticker}")["description"]
+
+
+def boards(ticker):
+    return get(f"/iss/securities/{ticker}")["boards"]
+
+
+@dataclass
+class Quoter:
+    board: Board
+    columns: Optional[List[str]] = None
+
+    def get_history(self, ticker: str, start=None, end=None):
+        param = make_query_dict(self.columns, start, end)
+        return self.board.history.quote(self.ticker, param)
+
+
+stocks = Quoter(
+    Board("stock", "shares", "TQBR"),
+    columns=[
+        "TRADEDATE",
+        "BOARDID",
+        "HIGH",
+        "LOW",
+        "OPEN",
+        "CLOSE",
+        "WAPRICE",
+        "NUMTRADES",
+        "VALUE",
+        "VOLUME",
+    ],
+)
+
+
+def history_endpoint(engine, market, board, security):
+    return (
+        f"/iss/history/engines/{engine}"
+        f"/markets/{market}"
+        f"/boards/{board}/"
+        f"securities/{security}"
+    )
+
+
+stocks = Board("stocks", "shares", "TQBR")
+corp_bonds = Board("stocks", "bonds", "TQBR")
+
+# TQCB, TQOB
+# state_bonds = Board(engine="stock", market="bonds", board="TQCB")
+# corp_bonds = Board(engine="stock", market="bonds", board="TQ0B")
 # this is corporate bonds - for government bonds need TQ0B
 def get_bonds_board(board="TQOB"):
     # use /history/
     pass
+
 
 def get_bonds():
     return get("/iss/engines/stock/markets/bonds/securities")["securities"]
