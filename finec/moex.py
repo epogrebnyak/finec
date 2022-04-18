@@ -233,6 +233,48 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
             df[col] = df[col].map(as_date)
     return df
 
+# maybe use a dataclass  
+from dataclasses import dataclass
+
+@dataclass
+class Market:
+    engine: str
+    market: str
+
+    # Will list securities by different boards
+    def securities(self):
+        pass
+
+    def boards(self):
+        pass
+
+@dataclass
+class Board:
+    engine: str
+    market: str
+    board: str 
+
+    # Both securities() and history_latest() will have quotes, but different column set
+    def securities(self):
+        pass
+
+    def history_latest(self):
+        pass
+
+    def yield_latest(self):
+        pass
+
+    def history(self, security: str, start: None, end: None):
+        pass
+
+
+#TQCB, TQOB
+#state_bonds = Board(engine="stock", market="bonds", board="TQCB")
+#corp_bonds = Board(engine="stock", market="bonds", board="TQ0B")
+# this is corporate bonds - for government bonds need TQ0B
+def get_bonds_board(board="TQOB"):
+    # use /history/
+    pass
 
 def get_bonds():
     return get("/iss/engines/stock/markets/bonds/securities")["securities"]
