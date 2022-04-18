@@ -1,3 +1,3 @@
 # finec
 
-Computational finance library from Finec MGIMO.
+Financial data and computation for Finec MGIMO students.
