@@ -8,17 +8,24 @@ Installation:
 
   pip install git+https://github.com/epogrebnyak/finec.git
 
-Retrieve daily quotes by instrument:
+Retrieve daily quotes by instrument as pandas dataframes:
 
-  from finec.moex import Stock, Bond, Currency, dataframe
+  from finec.moex import Stock, Bond, Currency, dataframe, find
 
   dataframe(Stock("YNDX").get_history())
   dataframe(Bond(ticker="RU000A101NJ6", board="TQIR").get_history())
   dataframe(Currency("USD000UTSTOM").get_history(start="2020-01-01"))
 
+Tell more about securities:
+
+  Stock("YNDX").whoami()
+  Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
+  find("USD000UTSTOM")
+
+
 User questions:
 
-- What classes of securities are available (stock, bond, index, currency)?
+- What classes of securities are available?
   Stock, Bond, Index, Currency
 
 - What is the ticker list for this class of security (eg all tickers for stocks)?
@@ -52,6 +59,9 @@ Unanswered:
 - Is MOEX ISS API documented?
 - Can MOEX bond yield calculation be trusted?
 - Can issuer ticker be linked to company tax number?
+- Are government bonds included in TQCB board?
+- Why are there so many boards?
+- Where can I get the dividend data?
 """
 
 from dataclasses import dataclass, field
@@ -64,7 +74,8 @@ from pandas._libs.missing import NAType
 
 __all__ = [
     "find",
-    "describe" "traded_boards",
+    "describe",
+    "traded_boards",
     "Stock",
     "Index",  # need index composition, as in https://github.com/WLM1ke/apimoex/issues/12
     "Bond",
