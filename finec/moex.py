@@ -5,6 +5,8 @@ import requests
 from apimoex import ISSClient
 from pandas._libs.missing import NAType
 from typing import List, Optional
+from dataclasses import dataclass, field
+
 
 __all__ = [
     "find",
@@ -20,28 +22,69 @@ __all__ = [
     "dataframe",
 ]
 
+def assert_date(s: str) -> str:
+    # TODO: date must be in YYYY-MM-DD format, passes now without check
+    return s
 
-def qualified(endpoint):
+def assert_endpoint(endpoint):
     if not endpoint.startswith("/iss"):
         raise ValueError(f"{endpoint} must start with '/iss'.")
+
+def qualified(endpoint):    
     return "https://iss.moex.com" + endpoint + ".json"
 
 
 def get(endpoint, param={}):
+    assert_endpoint(endpoint)
     with requests.Session() as session:
         return ISSClient(session, qualified(endpoint), param).get()
 
 
 def get_all(endpoint, param={}):
+    assert_endpoint(endpoint)
     with requests.Session() as session:
         return ISSClient(session, qualified(endpoint), param).get_all()
 
 
+@dataclass
+class Query:
+    endpoint: str
+    param: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        assert_endpoint(self.endpoint)
+
+    @property
+    def url(self):
+        return qualified(self.endpoint)    
+
+    def get(self):
+        with requests.Session() as session:
+            return ISSClient(session, self.url, self.param).get()
+
+    def get_all(self):
+        with requests.Session() as session:
+            return ISSClient(session, self.url, self.param).get_all()
+
+
 def find(query_str: str, is_traded=True):
-    # limits output to 100
     param = dict(q=query_str)
     param["is_trading"] = "1" if is_traded else "0"
+    # Note: possibly still limits output to 100 items
     return get_all(endpoint="/iss/securities", param=param)["securities"]
+
+
+def describe(ticker: str):
+    return get(f"/iss/securities/{ticker}")["description"]
+
+
+def board_dict(ticker: str):
+    return get(f"/iss/securities/{ticker}")["boards"]
+
+def traded_boards(ticker: str):
+    return [d["boardid"] for d in board_dict(ticker) if d["is_traded"] == 1]
+
+assert traded_boards("AFLT") == ['TQBR', 'SPEQ', 'SMAL', 'TQDP', 'RPMO', 'PTEQ', 'PSEQ', 'RPEU', 'RPEO', 'EQRD', 'EQRE', 'EQWP', 'EQWD', 'EQWE', 'EQRP', 'LIQR', 'EQRY', 'PSRY', 'PSRP', 'PSRD', 'PSRE', 'LIQB']
 
 
 class ValidColumns:
@@ -145,17 +188,6 @@ def history_endpoint(engine, market, board, security):
         f"securities/{security}"
     )
 
-
-def board_quote(engine, market, board, security, param={}):
-    endpoint = history_endpoint(engine, market, board, security)
-    return get_all(endpoint, param)["history"]
-
-
-def assert_date(s: str) -> str:
-    # date must be in YYYY-MM-DD format, pass now without check
-    return s
-
-
 def make_query_dict(columns, start, end):
     param = {}
     if columns:
@@ -165,6 +197,11 @@ def make_query_dict(columns, start, end):
     if end:
         param["till"] = assert_date(end)
     return param
+
+
+def board_quote(engine, market, board, security, param={}):
+    endpoint = history_endpoint(engine, market, board, security)
+    return get_all(endpoint, param)["history"]
 
 
 def stock_history(
@@ -233,10 +270,6 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
     return df
 
 
-# maybe use a dataclass
-from dataclasses import dataclass
-
-
 @dataclass
 class Market:
     engine: str
@@ -259,6 +292,8 @@ class Market:
     def boards(self) -> List:
         return get(self.endpoint + "/boards")["boards"]
 
+def names(dict_list: List[dict]):
+    return [d["name"] for d in dict_list]
 
 class MarketHistory(Market):
     engine: str
@@ -268,11 +303,14 @@ class MarketHistory(Market):
     def endpoint(self):
         return f"/iss/history/engines/{self.engine}/markets/{self.market}"
 
-    def columns(self) -> Dict:
+    def _columns(self) -> Dict:
         return get(self.endpoint + "/securities/columns")["history"]
 
+    def columns(self) -> List:
+        return names(self._columns())
+
     def securities(self):
-        return get(self.endpoint + "/securities")
+        return get_all(self.endpoint + "/securities")["history"]
 
 
 @dataclass
@@ -304,14 +342,6 @@ class BoardHistory:
 
     def securities(self):
         return get_all(self.endpoint + "/securities")["history"]
-
-
-def describe(ticker):
-    return get(f"/iss/securities/{ticker}")["description"]
-
-
-def boards(ticker):
-    return get(f"/iss/securities/{ticker}")["boards"]
 
 
 @dataclass
