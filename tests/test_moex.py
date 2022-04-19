@@ -77,10 +77,41 @@ def test_history_url():
     )
 
 
+def test_provoded_columns():
+    assert moex.Stock("YNDX").provided_columns() == [
+        "BOARDID",
+        "TRADEDATE",
+        "SHORTNAME",
+        "SECID",
+        "NUMTRADES",
+        "VALUE",
+        "OPEN",
+        "LOW",
+        "HIGH",
+        "LEGALCLOSEPRICE",
+        "WAPRICE",
+        "CLOSE",
+        "VOLUME",
+        "MARKETPRICE2",
+        "MARKETPRICE3",
+        "ADMITTEDQUOTE",
+        "MP2VALTRD",
+        "MARKETPRICE3TRADESVALUE",
+        "ADMITTEDVALUE",
+        "WAVAL",
+        "TRADINGSESSION",
+    ]
+
+
+def test_stock_endpoint():
+    assert (
+        moex.qualified(moex.Stock("YNDX").history_endpoint)
+        == "https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/YNDX.json"
+    )
+
+
 def test_stock_history():
-    assert moex.stock_history(
-        security="MGNT",
-        board="TQBR",
+    assert moex.Stock(ticker="MGNT", board="TQBR").get_history(
         columns=["SECID", "BOARDID", "TRADEDATE", "CLOSE", "VOLUME"],
         start="2021-11-15",
         end="2021-11-16",
@@ -103,9 +134,7 @@ def test_stock_history():
 
 
 def test_bond_history():
-    assert moex.bond_history(
-        security="RU000A101NJ6",
-        board="TQIR",
+    assert moex.Bond(ticker="RU000A101NJ6", board="TQIR").get_history(
         columns=["SECID", "BOARDID", "TRADEDATE", "CLOSE", "YIELDCLOSE", "MATDATE"],
         start="2022-04-15",
         end="2022-04-15",
@@ -121,9 +150,69 @@ def test_bond_history():
     ]
 
 
+def test_whoami():
+    assert moex.Bond("RU000A0JXN21").whoami() == {
+        "SECID": "RU000A0JXN21",
+        "NAME": 'АФК "Система" ПАО БО-001P-06',
+        "SHORTNAME": "СистемБ1P6",
+        "REGNUMBER": "4B02-06-01669-A-001P",
+        "ISIN": "RU000A0JXN21",
+        "ISSUEDATE": "2017-04-07",
+        "MATDATE": "2027-03-26",
+        "BUYBACKDATE": "2023-03-31",
+        "INITIALFACEVALUE": "1000",
+        "FACEUNIT": "SUR",
+        "LATNAME": "AFK Systema 001P-06",
+        "STARTDATEMOEX": "2017-04-07",
+        "PROGRAMREGISTRYNUMBER": "4-01669-A-001P-02E",
+        "EARLYREPAYMENT": "1",
+        "LISTLEVEL": "2",
+        "DAYSTOREDEMPTION": "1801",
+        "ISSUESIZE": "15000000",
+        "FACEVALUE": "1000",
+        "ISQUALIFIEDINVESTORS": "0",
+        "COUPONFREQUENCY": "2",
+        "COUPONDATE": "2022-09-30",
+        "COUPONPERCENT": "17",
+        "COUPONVALUE": "84.77",
+        "TYPENAME": "Биржевая облигация",
+        "GROUP": "stock_bonds",
+        "TYPE": "exchange_bond",
+        "GROUPNAME": "Облигации",
+        "EMITTER_ID": "2046",
+    }
+
+
+def test_traded_boards():
+    assert moex.traded_boards("AFLT") == [
+        "TQBR",
+        "SPEQ",
+        "SMAL",
+        "TQDP",
+        "RPMO",
+        "PTEQ",
+        "PSEQ",
+        "RPEU",
+        "RPEO",
+        "EQRD",
+        "EQRE",
+        "EQWP",
+        "EQWD",
+        "EQWE",
+        "EQRP",
+        "LIQR",
+        "EQRY",
+        "PSRY",
+        "PSRP",
+        "PSRD",
+        "PSRE",
+        "LIQB",
+    ]
+
+
 def test_currency_history():
-    assert moex.currency_history(
-        "EUR_RUB__TOM", board="CETS", columns=None, start="2022-04-01", end="2022-04-01"
+    assert moex.Currency("EUR_RUB__TOM", board="CETS").get_history(
+        columns=None, start="2022-04-01", end="2022-04-01"
     ) == [
         {
             "BOARDID": "CETS",
@@ -142,7 +231,7 @@ def test_currency_history():
 
 
 def test_index_history():
-    assert moex.index_history("IMOEX", start="2022-04-01", end="2022-04-01") == [
+    assert moex.Index("IMOEX").get_history(start="2022-04-01", end="2022-04-01") == [
         {
             "BOARDID": "SNDX",
             "SECID": "IMOEX",
@@ -162,5 +251,23 @@ def test_index_history():
             "DIVISOR": 4944847155.0997,
             "TRADINGSESSION": "3",
             "VOLUME": None,
+        }
+    ]
+
+
+def test_usd_rur():
+    assert moex.usdrur().get_history(start="2003-04-15", end="2003-04-15") == [
+        {
+            "BOARDID": "CETS",
+            "TRADEDATE": "2003-04-15",
+            "SHORTNAME": "USDRUB_TOM",
+            "SECID": "USD000UTSTOM",
+            "OPEN": 31.185,
+            "LOW": 31.185,
+            "HIGH": 31.1975,
+            "CLOSE": 31.197,
+            "NUMTRADES": 55,
+            "VOLRUR": 1132583105,
+            "WAPRICE": 31.1912,
         }
     ]

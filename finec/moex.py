@@ -1,20 +1,77 @@
-from typing import Dict, Union
+"""Data retrieval from MOEX statistics server.
+
+Developped by Evgeny Pogrebnyak, Finec MGIMO.
+
+Based on @WLMike1 apimoex.ISSClient and apimoex project. 
+
+Installation:
+
+  pip install git+https://github.com/epogrebnyak/finec.git
+
+Retrieve daily quotes by instrument:
+
+  from finec.moex import Stock, Bond, Currency, dataframe
+
+  dataframe(Stock("YNDX").get_history())
+  dataframe(Bond(ticker="RU000A101NJ6", board="TQIR").get_history())
+  dataframe(Currency("USD000UTSTOM").get_history(start="2020-01-01"))
+
+User questions:
+
+- What classes of securities are available (stock, bond, index, currency)?
+  Stock, Bond, Index, Currency
+
+- What is the ticker list for this class of security (eg all tickers for stocks)?
+  status: not implemented, superceded by next question
+
+- What are the latest quotes for all securities of the class (eg all corporate bonds)?
+  status: experimental
+  unclear of the source - market/secirities or board/securities?
+                          and /iss and /iss/history base
+
+- What is the quote history for a security (eg YNDX, AFLT, SBER, MTSS or RU000A101NJ6)?
+  status: implemented, tested
+
+Supplementary questions:
+
+- At what board a security is traded?
+
+  import finec.moex as moex
+  moex.traded_boards("MTSS")
+
+- What are the boards for each security class?
+
+  # not tested
+  moex.Market("stock", "shares").boards()
+
+Unanswered:
+
+- How can I get a nice dataset of the bonds market yields and durations?
+- What is index composition and weights?
+- Why do column lists differ across endpoints?
+- Is MOEX ISS API documented?
+- Can MOEX bond yield calculation be trusted?
+- Can issuer ticker be linked to company tax number?
+"""
+
+from dataclasses import dataclass, field
+from typing import ClassVar, Dict, List, Optional, Union
 
 import pandas as pd
 import requests
 from apimoex import ISSClient
 from pandas._libs.missing import NAType
-from typing import List, Optional
-from dataclasses import dataclass, field
-
 
 __all__ = [
     "find",
-    "stock_history",
-    "bond_history",
-    "currency_history",
+    "describe" "traded_boards",
+    "Stock",
+    "Index",  # need index composition, as in https://github.com/WLM1ke/apimoex/issues/12
+    "Bond",
+    "Currency",
+    "get_stocks",
     "get_bonds",
-    "get_shares",
+    "get_bond_yields",
     "get_currencies",
     "usd_rur",
     "eur_rur",
@@ -22,15 +79,18 @@ __all__ = [
     "dataframe",
 ]
 
+
 def assert_date(s: str) -> str:
-    # TODO: date must be in YYYY-MM-DD format, passes now without check
+    # date must be in YYYY-MM-DD format, passes now without check
     return s
+
 
 def assert_endpoint(endpoint):
     if not endpoint.startswith("/iss"):
         raise ValueError(f"{endpoint} must start with '/iss'.")
 
-def qualified(endpoint):    
+
+def qualified(endpoint):
     return "https://iss.moex.com" + endpoint + ".json"
 
 
@@ -56,7 +116,7 @@ class Query:
 
     @property
     def url(self):
-        return qualified(self.endpoint)    
+        return qualified(self.endpoint)
 
     def get(self):
         with requests.Session() as session:
@@ -81,75 +141,147 @@ def describe(ticker: str):
 def board_dict(ticker: str):
     return get(f"/iss/securities/{ticker}")["boards"]
 
+
 def traded_boards(ticker: str):
     return [d["boardid"] for d in board_dict(ticker) if d["is_traded"] == 1]
 
-assert traded_boards("AFLT") == ['TQBR', 'SPEQ', 'SMAL', 'TQDP', 'RPMO', 'PTEQ', 'PSEQ', 'RPEU', 'RPEO', 'EQRD', 'EQRE', 'EQWP', 'EQWD', 'EQWE', 'EQRP', 'LIQR', 'EQRY', 'PSRY', 'PSRP', 'PSRD', 'PSRE', 'LIQB']
+
+def endpoint(base, engine, market, board="", ticker=""):
+    assert_endpoint(base)
+    res = base + f"/engines/{engine}/markets/{market}"
+    if board:
+        res += f"/boards/{board}"
+    if ticker:
+        res += f"/securities/{ticker}"
+    return res
 
 
-class ValidColumns:
-    security_bond = [  # security
-        "SECID",
-        "SECNAME",
-        "SHORTNAME",
-        "LATNAME",
-        "BOARDID",
-        "BOARDNAME",
-        "LISTLEVEL",
-        "STATUS",
-        "ISIN",
-        "REGNUMBER",
-        "MARKETCODE",
-        "INSTRID",
-        "SECTORID",
-        "SECTYPE",
-        "CURRENCYID",
-        "DECIMALS",
-        "MINSTEP",
-        "LOTSIZE",
-        "LOTVALUE",
-        "FACEUNIT",
-        "FACEVALUE",
-        "ISSUESIZE",
-        "ISSUESIZEPLACED",
-        "REMARKS",
-        # latest quote
-        "OFFERDATE",
-        "MATDATE",
-        "BUYBACKDATE",
-        "BUYBACKPRICE",
-        "COUPONPERCENT",
-        "COUPONVALUE",
-        "COUPONPERIOD",
-        "NEXTCOUPON",
-        "ACCRUEDINT",
-        "SETTLEDATE",
-        "PREVDATE",
-        "PREVPRICE",
-        "YIELDATPREVWAPRICE",
-    ]
+def history_endpoint(engine, market, board="", ticker=""):
+    return endpoint("/iss/history", engine, market, board, ticker)
 
-    security_currency = [
-        "SECID",
-        "BOARDID",
-        "MARKETCODE",
-        "SECNAME",
-        "SHORTNAME",
-        "SETTLEDATE",
-        "PREVPRICE",
-        "PREVWAPRICE",
-        "PREVDATE",
-        "CURRENCYID",
-    ]
 
-    history_bond = [
+@dataclass
+class Market:
+    engine: str
+    market: str
+
+    @property
+    def endpoint(self):
+        return f"/iss/engines/{self.engine}/markets/{self.market}"
+
+    @property
+    def history_endpoint(self):
+        return f"/iss/history/engines/{self.engine}/markets/{self.market}"
+
+    def describe(self):
+        return get(self.endpoint)
+
+    def securities(self) -> Dict:
+        return get(self.endpoint + "/securities")
+
+    def securities_history(self) -> Dict:
+        return get(self.history_endpoint + "/securities")
+
+    def boards(self) -> List:
+        return get(self.endpoint + "/boards")["boards"]
+
+
+@dataclass
+class Board(Market):
+    engine: str
+    market: str
+    board: str
+
+    @property
+    def endpoint(self):
+        return f"/iss/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
+
+    @property
+    def history_endpoint(self):
+        return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
+
+
+def make_query_dict(columns, start, end):
+    param = {}
+    if columns:
+        param["history.columns"] = ",".join(columns)
+    if start:
+        param["from"] = assert_date(start)
+    if end:
+        param["till"] = assert_date(end)
+    return param
+
+
+def quote(b: Board, ticker: str, columns=[], start="", end=""):
+    endpoint = history_endpoint(b.engine, b.market, b.board, ticker)
+    param = make_query_dict(columns, start, end)
+    return get_all(endpoint, param)["history"]
+
+
+def default(value):
+    return field(repr=False, default=value)
+
+
+ClassList = ClassVar[Optional[List[str]]]
+
+
+@dataclass
+class Security:
+    ticker: str
+    board: str = ""
+    engine: str = default("")
+    market: str = default("")
+    default_columns: ClassList = None
+
+    def whoami(self):
+        return {d["name"]: d["value"] for d in describe(self.ticker)}
+
+    @property
+    def board_obj(self):
+        return Board(self.engine, self.market, self.board)
+
+    @property
+    def history_endpoint(self):
+        return history_endpoint(self.engine, self.market, self.board, self.ticker)
+
+    def provided_columns(self):
+        sample_dicts = get(self.history_endpoint)["history"]
+        return list(sample_dicts[0].keys())
+
+    def get_history(self, columns=[], start="", end=""):
+        """ "Use columns=None to get all columns, showing default_columns otherwise."""
+        if columns == []:
+            columns = self.default_columns
+        return quote(self.board_obj, self.ticker, columns, start, end)
+
+
+@dataclass
+class Stock(Security):
+    ticker: str
+    board: str = "TQBR"
+    engine: str = default("stock")
+    market: str = default("shares")
+    default_columns: ClassList = [
         "TRADEDATE",
         "BOARDID",
-        "HIGH",
-        "LOW",
-        "OPEN",
         "CLOSE",
         "WAPRICE",
+        "NUMTRADES",
+        "VALUE",
+        "VOLUME",
+    ]
+
+
+@dataclass
+class Bond(Security):
+    ticker: str
+    board: str = "TQCB"
+    engine: str = default("stock")
+    market: str = default("bonds")
+    default_columns: ClassList = [
+        "TRADEDATE",
+        "BOARDID",
+        "CLOSE",
         "YIELDCLOSE",
         "NUMTRADES",
         "VALUE",
@@ -166,89 +298,57 @@ class ValidColumns:
         "CURRENCYID",
     ]
 
-    history_stock = [
-        "TRADEDATE",
-        "BOARDID",
-        "HIGH",
-        "LOW",
-        "OPEN",
-        "CLOSE",
-        "WAPRICE",
-        "NUMTRADES",
-        "VALUE",
-        "VOLUME",
-    ]
+
+@dataclass
+class Index(Security):
+    ticker: str
+    board: str = "SNDX"
+    engine: str = default("stock")
+    market: str = default("index")
+    default_columns: ClassList = None
 
 
-def history_endpoint(engine, market, board, security):
-    return (
-        f"/iss/history/engines/{engine}"
-        f"/markets/{market}"
-        f"/boards/{board}/"
-        f"securities/{security}"
-    )
-
-def make_query_dict(columns, start, end):
-    param = {}
-    if columns:
-        param["history.columns"] = ",".join(columns)
-    if start:
-        param["from"] = assert_date(start)
-    if end:
-        param["till"] = assert_date(end)
-    return param
-
-
-def board_quote(engine, market, board, security, param={}):
-    endpoint = history_endpoint(engine, market, board, security)
-    return get_all(endpoint, param)["history"]
-
-
-def stock_history(
-    security, board="TQBR", columns=ValidColumns.history_stock, start=None, end=None
-):
-    param = make_query_dict(columns, start, end)
-    return board_quote("stock", "shares", board, security, param)
-
-
-def bond_history(
-    security, board="TQCB", columns=ValidColumns.history_bond, start=None, end=None
-):
-    param = make_query_dict(columns, start, end)
-    return board_quote("stock", "bonds", board, security, param)
-
-
-def currency_history(security, board="CETS", columns=None, start=None, end=None):
+@dataclass
+class Currency(Security):
     # https://iss.moex.com/iss/engines/currency/markets/selt/boards/CETS/securities
     # https://www.moex.com/s135
-    param = make_query_dict(columns, start, end)
-    return board_quote("currency", "selt", board, security, param)
+    ticker: str
+    board: str = "CETS"
+    engine: str = default("currency")
+    market: str = default("selt")
+    default_columns: ClassList = None
 
 
-def index_history(
-    security, board="SNDX", columns=None, start=None, end=None
-):  # not tested
-    # index_history("IMOEX")
-    param = make_query_dict(columns, start, end)
-    return board_quote("stock", "index", board, security, param)
+def usd_rur():
+    return Currency("USD000UTSTOM")
 
 
-def usd_rur(columns=None, start=None, end=None):
-    return currency_history(
-        security="USD000UTSTOM", columns=columns, start=start, end=end
-    )
+def eur_rur():
+    return Currency("EUR_RUB__TOM")
 
 
-def eur_rur(columns=None, start=None, end=None):
-    return currency_history(
-        security="EUR_RUB__TOM", columns=columns, start=start, end=end
-    )
+def cny_rur():
+    return Currency("CNYRUB_TOM")
 
 
-def cny_rur(columns=None, start=None, end=None):
-    return currency_history(
-        security="CNYRUB_TOM", columns=columns, start=start, end=end
-    )
+def get_bonds():
+    return get("/iss/engines/stock/markets/bonds/securities")["securities"]
+
+
+def get_bond_yields():
+    return get("/iss/engines/stock/markets/bonds/securities")["marketdata_yields"]
+
+
+def get_stocks():
+    return get("/iss/engines/stock/markets/shares/securities")["securities"]
+
+
+def get_currencies():  # not tested
+    return get("/iss/engines/currency/markets/selt/securities")["securities"]
+
+
+def get_indices():
+    return get("/iss/engines/stock/markets/index/securities")["securities"]
 
 
 def as_date(s: str) -> Union[pd.Timestamp, NAType]:
@@ -268,145 +368,3 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
         if col in df.columns:
             df[col] = df[col].map(as_date)
     return df
-
-
-@dataclass
-class Market:
-    engine: str
-    market: str
-
-    @property
-    def endpoint(self):
-        return f"/iss/engines/{self.engine}/markets/{self.market}"
-
-    def describe(self):
-        return get(self.endpoint)
-
-    def securities(self) -> Dict:
-        return get(self.endpoint + "/securities")
-
-    def columns(self) -> Dict:
-        # must select key in output dict
-        return get(self.endpoint + "/securities/columns")
-
-    def boards(self) -> List:
-        return get(self.endpoint + "/boards")["boards"]
-
-def names(dict_list: List[dict]):
-    return [d["name"] for d in dict_list]
-
-class MarketHistory(Market):
-    engine: str
-    market: str
-
-    @property
-    def endpoint(self):
-        return f"/iss/history/engines/{self.engine}/markets/{self.market}"
-
-    def _columns(self) -> Dict:
-        return get(self.endpoint + "/securities/columns")["history"]
-
-    def columns(self) -> List:
-        return names(self._columns())
-
-    def securities(self):
-        return get_all(self.endpoint + "/securities")["history"]
-
-
-@dataclass
-class Board:
-    engine: str
-    market: str
-    board: str
-
-    @property
-    def endpoint(self):
-        return f"/iss/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
-
-    def describe(self):
-        return get(self.endpoint)
-
-    def securities(self):
-        return get(self.endpoint + "/securities")
-
-
-@dataclass
-class BoardHistory:
-    engine: str
-    market: str
-    board: str
-
-    @property
-    def endpoint(self):
-        return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
-
-    def securities(self):
-        return get_all(self.endpoint + "/securities")["history"]
-
-
-@dataclass
-class Quoter:
-    board: Board
-    columns: Optional[List[str]] = None
-
-    def get_history(self, ticker: str, start=None, end=None):
-        param = make_query_dict(self.columns, start, end)
-        return self.board.history.quote(self.ticker, param)
-
-
-stocks = Quoter(
-    Board("stock", "shares", "TQBR"),
-    columns=[
-        "TRADEDATE",
-        "BOARDID",
-        "HIGH",
-        "LOW",
-        "OPEN",
-        "CLOSE",
-        "WAPRICE",
-        "NUMTRADES",
-        "VALUE",
-        "VOLUME",
-    ],
-)
-
-
-def history_endpoint(engine, market, board, security):
-    return (
-        f"/iss/history/engines/{engine}"
-        f"/markets/{market}"
-        f"/boards/{board}/"
-        f"securities/{security}"
-    )
-
-
-stocks = Board("stocks", "shares", "TQBR")
-corp_bonds = Board("stocks", "bonds", "TQBR")
-
-# TQCB, TQOB
-# state_bonds = Board(engine="stock", market="bonds", board="TQCB")
-# corp_bonds = Board(engine="stock", market="bonds", board="TQ0B")
-# this is corporate bonds - for government bonds need TQ0B
-def get_bonds_board(board="TQOB"):
-    # use /history/
-    pass
-
-
-def get_bonds():
-    return get("/iss/engines/stock/markets/bonds/securities")["securities"]
-
-
-def get_bond_yields():
-    return get("/iss/engines/stock/markets/bonds/securities")["marketdata_yields"]
-
-
-def get_shares():
-    return get("/iss/engines/stock/markets/shares/securities")["securities"]
-
-
-def get_currencies():  # not tested
-    return get("/iss/engines/currency/markets/selt/securities")["securities"]
-
-
-def get_indices():
-    return get("/iss/engines/stock/markets/index/securities")["securities"]
