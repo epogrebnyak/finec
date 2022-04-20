@@ -11,7 +11,7 @@ pip install git+https://github.com/epogrebnyak/finec.git
 
 ## Minimal example
 
-Get trading history by security as pandas dataframe:
+Get MOEX trading history for stocks, bonds or currencies as pandas dataframe:
 
 ```python
 from finec.moex import Bond, Currency, Stock, dataframe
