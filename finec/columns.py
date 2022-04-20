@@ -89,4 +89,3 @@ class ValidColumns:
         "VALUE",
         "VOLUME",
     ]
-
