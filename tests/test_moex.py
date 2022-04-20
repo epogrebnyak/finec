@@ -209,8 +209,23 @@ def test_traded_boards():
         "LIQB",
     ]
 
+
 def test_market_traded_boards():
-   assert list(moex.Market("stock", "shares").traded_boards().keys()) == ['SMAL', 'SPEQ', 'TQBR', 'TQDP', 'TQFD', 'TQFE', 'TQIF', 'TQPD', 'TQPE', 'TQPI', 'TQTD', 'TQTE', 'TQTF']
+    assert list(moex.Market("stock", "shares").traded_boards().keys()) == [
+        "SMAL",
+        "SPEQ",
+        "TQBR",
+        "TQDP",
+        "TQFD",
+        "TQFE",
+        "TQIF",
+        "TQPD",
+        "TQPE",
+        "TQPI",
+        "TQTD",
+        "TQTE",
+        "TQTF",
+    ]
 
 
 def test_currency_history():
@@ -275,5 +290,6 @@ def test_usd_rur():
         }
     ]
 
+
 def test_index_composition():
-    assert "SBER" in [d['ticker'] for d in Index("IMOEX").composition()]
+    assert "SBER" in [d["ticker"] for d in moex.Index("IMOEX").composition()]

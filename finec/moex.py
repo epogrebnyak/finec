@@ -156,7 +156,7 @@ def board_dict(ticker: str):
 
 
 def traded_boards(ticker: str):
-    return {d["boardid"]:d["title"] for d in board_dict(ticker) if d["is_traded"] == 1}
+    return {d["boardid"]: d["title"] for d in board_dict(ticker) if d["is_traded"] == 1}
 
 
 def endpoint(base, engine, market, board="", ticker=""):
@@ -199,10 +199,10 @@ class Market:
         return get(self.endpoint + "/boards")["boards"]
 
     def boards(self):
-        return {d["boardid"]: d["title"] for d in self._boards()} 
+        return {d["boardid"]: d["title"] for d in self._boards()}
 
     def traded_boards(self):
-        return {d["boardid"]: d["title"] for d in self._boards() if d["is_traded"] == 1} 
+        return {d["boardid"]: d["title"] for d in self._boards() if d["is_traded"] == 1}
 
 
 @dataclass
@@ -328,9 +328,12 @@ class Index(Security):
 
     def composition(self):
         # Implemented as in https://github.com/WLM1ke/apimoex/issues/12
-        endpoint = f"/iss/statistics/engines/stock/markets/index/analytics/{self.ticker}"
-        return get_all(endpoint)['analytics']
-        
+        # On web see https://www.moex.com/ru/index/IMOEX/constituents/
+        endpoint = (
+            f"/iss/statistics/engines/stock/markets/index/analytics/{self.ticker}"
+        )
+        return get_all(endpoint)["analytics"]
+
 
 @dataclass
 class Currency(Security):

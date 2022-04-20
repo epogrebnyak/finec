@@ -23,4 +23,10 @@ dataframe(Currency("USD000UTSTOM").get_history(start="2022-01-01"))
 
 ## More examples
 
-See [example.py](example.py).
+See [example.py](example.py)
+
+
+## Aknowledgements
+
+- We rely on `apimoex.ISSClient` and expertise developped within [apimoex project](https://github.com/WLM1ke/apimoex) by [@WLMike1](https://github.com/WLM1ke).
+
