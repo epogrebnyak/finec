@@ -18,3 +18,6 @@ find("Челябинский")
 
 # Market and board info
 Market("stock", "shares").traded_boards()
+
+#Index composition
+Index("IMOEX").composition()

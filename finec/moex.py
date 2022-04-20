@@ -79,7 +79,7 @@ __all__ = [
     "describe",
     "traded_boards",
     "Stock",
-    "Index",  # need index composition, as in https://github.com/WLM1ke/apimoex/issues/12
+    "Index",
     "Bond",
     "Currency",
     "get_stocks",
@@ -326,6 +326,11 @@ class Index(Security):
     market: str = default("index")
     default_columns: ClassList = None
 
+    def composition(self):
+        # Implemented as in https://github.com/WLM1ke/apimoex/issues/12
+        endpoint = f"/iss/statistics/engines/stock/markets/index/analytics/{self.ticker}"
+        return get_all(endpoint)['analytics']
+        
 
 @dataclass
 class Currency(Security):

@@ -274,3 +274,6 @@ def test_usd_rur():
             "WAPRICE": 31.1912,
         }
     ]
+
+def test_index_composition():
+    assert "SBER" in [d['ticker'] for d in Index("IMOEX").composition()]
