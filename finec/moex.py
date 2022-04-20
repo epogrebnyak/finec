@@ -1,4 +1,4 @@
-"""Data retrieval from MOEX statistics server.
+"""finec.moex - Data retrieval from MOEX statistics server.
 
 Developped by Evgeny Pogrebnyak, Finec MGIMO.
 
@@ -20,7 +20,7 @@ Tell more about securities:
 
   Stock("YNDX").whoami()
   Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
-  find("USD000UTSTOM")
+  find("Челябинский")
 
 
 User questions:
@@ -54,6 +54,8 @@ Supplementary questions:
 Unanswered:
 
 - How can I get a nice dataset of the bonds market yields and durations?
+- Is there any documentation?
+  See references in https://github.com/WLM1ke/apimoex
 - What is index composition and weights?
 - Why do column lists differ across endpoints?
 - Is MOEX ISS API documented?
@@ -154,7 +156,7 @@ def board_dict(ticker: str):
 
 
 def traded_boards(ticker: str):
-    return [d["boardid"] for d in board_dict(ticker) if d["is_traded"] == 1]
+    return {d["boardid"]:d["title"] for d in board_dict(ticker) if d["is_traded"] == 1}
 
 
 def endpoint(base, engine, market, board="", ticker=""):
@@ -193,8 +195,14 @@ class Market:
     def securities_history(self) -> Dict:
         return get(self.history_endpoint + "/securities")
 
-    def boards(self) -> List:
+    def _boards(self) -> List:
         return get(self.endpoint + "/boards")["boards"]
+
+    def boards(self):
+        return {d["boardid"]: d["title"] for d in self._boards()} 
+
+    def traded_boards(self):
+        return {d["boardid"]: d["title"] for d in self._boards() if d["is_traded"] == 1} 
 
 
 @dataclass

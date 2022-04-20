@@ -184,7 +184,7 @@ def test_whoami():
 
 
 def test_traded_boards():
-    assert moex.traded_boards("AFLT") == [
+    assert list(moex.traded_boards("AFLT").keys()) == [
         "TQBR",
         "SPEQ",
         "SMAL",
@@ -208,6 +208,9 @@ def test_traded_boards():
         "PSRE",
         "LIQB",
     ]
+
+def test_market_traded_boards():
+   assert list(moex.Market("stock", "shares").traded_boards().keys()) == ['SMAL', 'SPEQ', 'TQBR', 'TQDP', 'TQFD', 'TQFE', 'TQIF', 'TQPD', 'TQPE', 'TQPI', 'TQTD', 'TQTE', 'TQTF']
 
 
 def test_currency_history():
