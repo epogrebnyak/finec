@@ -256,7 +256,7 @@ def test_index_history():
 
 
 def test_usd_rur():
-    assert moex.usdrur().get_history(start="2003-04-15", end="2003-04-15") == [
+    assert moex.usd_rur().get_history(start="2003-04-15", end="2003-04-15") == [
         {
             "BOARDID": "CETS",
             "TRADEDATE": "2003-04-15",
