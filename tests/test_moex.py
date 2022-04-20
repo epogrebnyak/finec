@@ -110,8 +110,16 @@ def test_stock_endpoint():
     )
 
 
+def test_stock_history_dataframe():
+    import pandas as pd
+    
+    df = moex.Stock("YNDX").get_history(start="2022-01-15")
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) >= 65
+
+
 def test_stock_history():
-    assert moex.Stock(ticker="MGNT", board="TQBR").get_history(
+    assert moex.Stock(ticker="MGNT", board="TQBR").get_history_json(
         columns=["SECID", "BOARDID", "TRADEDATE", "CLOSE", "VOLUME"],
         start="2021-11-15",
         end="2021-11-16",
@@ -134,7 +142,7 @@ def test_stock_history():
 
 
 def test_bond_history():
-    assert moex.Bond(ticker="RU000A101NJ6", board="TQIR").get_history(
+    assert moex.Bond(ticker="RU000A101NJ6", board="TQIR").get_history_json(
         columns=["SECID", "BOARDID", "TRADEDATE", "CLOSE", "YIELDCLOSE", "MATDATE"],
         start="2022-04-15",
         end="2022-04-15",
@@ -229,7 +237,7 @@ def test_market_traded_boards():
 
 
 def test_currency_history():
-    assert moex.Currency("EUR_RUB__TOM", board="CETS").get_history(
+    assert moex.Currency("EUR_RUB__TOM", board="CETS").get_history_json(
         columns=None, start="2022-04-01", end="2022-04-01"
     ) == [
         {
@@ -249,7 +257,7 @@ def test_currency_history():
 
 
 def test_index_history():
-    assert moex.Index("IMOEX").get_history(start="2022-04-01", end="2022-04-01") == [
+    assert moex.Index("IMOEX").get_history_json(start="2022-04-01", end="2022-04-01") == [
         {
             "BOARDID": "SNDX",
             "SECID": "IMOEX",
@@ -274,7 +282,7 @@ def test_index_history():
 
 
 def test_usd_rur():
-    assert moex.usd_rur().get_history(start="2003-04-15", end="2003-04-15") == [
+    assert moex.usd_rur().get_history_json(start="2003-04-15", end="2003-04-15") == [
         {
             "BOARDID": "CETS",
             "TRADEDATE": "2003-04-15",

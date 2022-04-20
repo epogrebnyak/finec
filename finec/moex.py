@@ -12,9 +12,9 @@ Retrieve daily quotes by instrument as pandas dataframes:
 
   from finec.moex import Stock, Bond, Currency, dataframe, find
 
-  dataframe(Stock("YNDX").get_history())
-  dataframe(Bond(ticker="RU000A101NJ6", board="TQIR").get_history())
-  dataframe(Currency("USD000UTSTOM").get_history(start="2020-01-01"))
+  Stock("YNDX").get_history()
+  Bond(ticker="RU000A101NJ6", board="TQIR").get_history()
+  Currency("USD000UTSTOM").get_history(start="2020-01-01")
 
 Tell more about securities:
 
@@ -267,11 +267,14 @@ class Security:
         sample_dicts = get(self.history_endpoint)["history"]
         return list(sample_dicts[0].keys())
 
-    def get_history(self, columns=[], start="", end=""):
+    def get_history_json(self, columns=[], start="", end=""):
         """ "Use columns=None to get all columns, showing default_columns otherwise."""
         if columns == []:
             columns = self.default_columns
         return quote(self.board_obj, self.ticker, columns, start, end)
+
+    def get_history(self, columns=[], start="", end=""):
+        return dataframe(self.get_history_json(columns, start, end))
 
 
 @dataclass

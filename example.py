@@ -13,12 +13,13 @@ from finec.moex import (
 )
 
 # Get history as JSONS
-Stock("YNDX").get_history(start="2022-01-01")
+Stock("YNDX").get_history_json(start="2022-01-01")
 
 # Get history as dataframes
-dataframe(Stock("YNDX").get_history(start="2022-01-01"))
-dataframe(Bond(ticker="RU000A101NJ6", board="TQIR").get_history())
-dataframe(Currency("USD000UTSTOM").get_history(start="2022-01-01"))
+Stock("YNDX").get_history()
+Bond(ticker="RU000A101NJ6", board="TQIR").get_history()
+Currency("USD000UTSTOM").get_history(start="2020-01-01")
+Index("IMOEX").get_history(start="2021-12-01", end="2021-12-31")
 
 # Security info
 Stock("YNDX").whoami()  # identical to describe("YNDX")
@@ -32,6 +33,5 @@ find("Челябинский")
 # Market and board info
 Market("stock", "shares").traded_boards()
 
-# Index composition
-# https://www.moex.com/ru/index/IMOEX/constituents/
+# Index composition - as in https://www.moex.com/ru/index/IMOEX/constituents/
 Index("IMOEX").composition()
