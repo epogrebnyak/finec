@@ -1,3 +1,5 @@
+[![Tests](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml/badge.svg)](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml)
+
 # finec
 
 Financial data and computation for Finec MGIMO students.
