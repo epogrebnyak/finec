@@ -401,3 +401,18 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
         if col in df.columns:
             df[col] = df[col].map(as_date)
     return df
+
+
+def yield_fields(cls, tickers, field="CLOSE"):
+  import tqdm
+  columns = ["TRADEDATE", "SECID"] + [field]
+  for t in tqdm.tqdm(tickers):
+    for j in cls(t).get_history_json(columns):
+      if j[field]:
+        yield j
+
+def to_csv(filename, cls, tickers, field="CLOSE"):
+  gen = yield_fields(Stock, tickers, field)
+  df = pd.DataFrame(gen).pivot(index="TRADEDATE", columns="SECID", values=field)
+  df.to_csv(filename)
+
