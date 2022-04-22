@@ -1,6 +1,7 @@
-from finec.moex import to_csv, Stock, Index
-
-tickers = Index("IMOEX").tickers()
+import itertools
+from finec.moex import save_generator, yield_fields, Stock, Index
 
 # runs several minutes
-to_csv("datasets/IMOEX_CLOSE.csv", Stock, tickers, "CLOSE")
+tickers = Index("IMOEX").tickers()
+gen = yield_fields(Stock, tickers, "CLOSE")
+save_generator("datasets/IMOEX_CLOSE.csv", gen, "CLOSE")
