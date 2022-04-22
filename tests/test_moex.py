@@ -112,7 +112,7 @@ def test_stock_endpoint():
 
 def test_stock_history_dataframe():
     import pandas as pd
-    
+
     df = moex.Stock("YNDX").get_history(start="2022-01-15")
     assert isinstance(df, pd.DataFrame)
     assert len(df) >= 65
@@ -260,7 +260,9 @@ def test_currency_history():
 
 
 def test_index_history():
-    assert moex.Index("IMOEX").get_history_json(start="2022-04-01", end="2022-04-01") == [
+    assert moex.Index("IMOEX").get_history_json(
+        start="2022-04-01", end="2022-04-01"
+    ) == [
         {
             "BOARDID": "SNDX",
             "SECID": "IMOEX",

@@ -12,6 +12,7 @@ apimoex = "^1.2.0"
 pandas = "1.3.5"
 requests = "^2.23.0"
 folium = "^0.2.1"
+pymongo = "^4.1.1"
 
 
 [tool.poetry.dev-dependencies]

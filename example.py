@@ -7,9 +7,9 @@ from finec.moex import (
     Market,
     Stock,
     dataframe,
+    describe,
     find,
     traded_boards,
-    describe,
 )
 
 # Get history as JSONS
