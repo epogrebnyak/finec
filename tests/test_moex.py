@@ -159,7 +159,9 @@ def test_bond_history():
 
 
 def test_whoami():
-    assert moex.Bond("RU000A0JXN21").whoami() == {
+    res_dict = moex.Bond("RU000A0JXN21").whoami()
+    del res_dict["DAYSTOREDEMPTION"]
+    assert res_dict == {
         "SECID": "RU000A0JXN21",
         "NAME": 'АФК "Система" ПАО БО-001P-06',
         "SHORTNAME": "СистемБ1P6",
@@ -175,7 +177,8 @@ def test_whoami():
         "PROGRAMREGISTRYNUMBER": "4-01669-A-001P-02E",
         "EARLYREPAYMENT": "1",
         "LISTLEVEL": "2",
-        "DAYSTOREDEMPTION": "1801",
+        # This changes over time, so we delete field from comparison
+        # "DAYSTOREDEMPTION": "1801",
         "ISSUESIZE": "15000000",
         "FACEVALUE": "1000",
         "ISQUALIFIEDINVESTORS": "0",
