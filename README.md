@@ -4,7 +4,6 @@
 
 Financial data and computation utilities for Finec MGIMO students.
 
-
 ## Installation
 
 ```console

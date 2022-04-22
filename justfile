@@ -1,5 +1,9 @@
 package := "finec"
 
+# format markdown
+prettier:
+  npx prettier --write .
+
 # launch streamlit app
 app:
   poetry run streamlit run streamlit_app.py
