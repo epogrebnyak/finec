@@ -1,3 +1,5 @@
+node_modules/
+
 # more hidden folders
 .venv/
 .vscode/
