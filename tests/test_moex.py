@@ -305,4 +305,60 @@ def test_usd_rur():
 
 
 def test_index_composition():
-    assert "SBER" in [d["ticker"] for d in moex.Index("IMOEX").composition()]
+    assert set(moex.Index("IMOEX").composition()[0].keys()) == {
+        "indexid",
+        "secids",
+        "shortnames",
+        "ticker",
+        "tradedate",
+        "tradingsession",
+        "weight",
+    }
+
+
+def test_index_tickers():
+    assert sorted(moex.Index("IMOEX").tickers()) == [
+        "AFKS",
+        "AFLT",
+        "ALRS",
+        "CBOM",
+        "CHMF",
+        "DSKY",
+        "ENPG",
+        "FEES",
+        "FIVE",
+        "FIXP",
+        "GAZP",
+        "GLTR",
+        "GMKN",
+        "HHRU",
+        "HYDR",
+        "IRAO",
+        "LKOH",
+        "MAGN",
+        "MGNT",
+        "MOEX",
+        "MTSS",
+        "NLMK",
+        "NVTK",
+        "OZON",
+        "PHOR",
+        "PIKK",
+        "PLZL",
+        "POGR",
+        "POLY",
+        "ROSN",
+        "RTKM",
+        "RUAL",
+        "SBER",
+        "SBERP",
+        "SNGS",
+        "SNGSP",
+        "TATN",
+        "TATNP",
+        "TCSG",
+        "TRNFP",
+        "VKCO",
+        "VTBR",
+        "YNDX",
+    ]

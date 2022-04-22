@@ -337,6 +337,9 @@ class Index(Security):
         )
         return get_all(endpoint)["analytics"]
 
+    def tickers(self):
+        return [d["ticker"] for d in self.composition()]
+
 
 @dataclass
 class Currency(Security):

@@ -28,7 +28,7 @@ def get_dividend_dataframe(filepath: str) -> pd.DataFrame:
 
       div_df = get_dividend_dataframe("dividend.csv")
       div_df[div_df.ticker=="GMKN"].sort_values("date", ascending=True)
-    
+
     """
     if not Path(filepath).exists():
         save_dividend(filepath)
