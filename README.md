@@ -33,7 +33,13 @@ Index("IMOEX").composition()
 
 ## Other functions
 
-`get_dividend_dataframe(filepath)` - get dividend history from <https://github.com/WLM1ke/poptimizer> for MOEX stocks
+```python 
+from finec import get_dividend
+
+# get stock dividend history from https://github.com/WLM1ke/poptimizer
+div_df = get_dividend(temp_filepath="dividend.csv")
+```
+
 
 ## More examples
 

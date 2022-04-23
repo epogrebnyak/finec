@@ -5,7 +5,7 @@ import pandas as pd
 import requests
 
 
-def save_dividend(filepath: str):
+def _save_dividend(filepath: str):
     """Save dividend information from WLM1ke/poptimizer to a local *filepath* as CSV file.
     Data source: <https://github.com/WLM1ke/poptimizer/tree/master/dump/source>
     Columns: `ticker`, `date`, `dividends`, `currency`.
@@ -18,18 +18,20 @@ def save_dividend(filepath: str):
     pd.DataFrame(gen).drop(columns=["_id"]).to_csv(filepath, index=False)
 
 
-def get_dividend_dataframe(filepath: str) -> pd.DataFrame:
+def get_dividend(temp_filepath: str) -> pd.DataFrame:
     """Return dividend information from WLM1ke/poptimizer as dataframe.
 
-    Will read from local *filepath*, if exists, or download and save
-    data to *filepath*, if it does not exist.
+    Will read from local *temp_filepath*, if exists, or download and save
+    data to *temp_filepath*, if it does not exist.
 
     Example:
 
-      div_df = get_dividend_dataframe("dividend.csv")
+      div_df = get_dividend(cache_at="dividend.csv")
       div_df[div_df.ticker=="GMKN"].sort_values("date", ascending=True)
 
+    Data source: <https://github.com/WLM1ke/poptimizer/tree/master/dump/source>
+    Columns: `ticker`, `date`, `dividends`, `currency`.
     """
-    if not Path(filepath).exists():
-        save_dividend(filepath)
-    return pd.read_csv(filepath, parse_dates=["date"])
+    if not Path(temp_filepath).exists():
+        _save_dividend(temp_filepath)
+    return pd.read_csv(temp_filepath, parse_dates=["date"])
