@@ -1,3 +1,5 @@
+#!/bin/bash 
+
 # create ~/bin
 mkdir -p ~/bin
 
