@@ -1,4 +1,5 @@
 {
 //   "postCreateCommand": "bash .devcontainer/post_create.sh",
      "forwardPorts": [8501],
+     "remoteEnv": {"PATH": "${containerEnv:PATH}:$HOME/bin"},      
 }
