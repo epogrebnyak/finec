@@ -97,7 +97,7 @@ References:
 Notes: 
 
 - MOEX API is very generious to provide a lot of data for free and without any registration or tokens. 
-- API provided on "as is" basis, some parts are undocumented.
+- API provided on "as is" basis and some parts are undocumented.
 
 
 ## Aknowledgements
