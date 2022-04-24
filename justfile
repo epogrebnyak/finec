@@ -1,5 +1,10 @@
 package := "finec"
 
+# publish to PyPI
+publish:
+  export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+  poetry publish 
+
 # run code from README
 readme:
   cat README.md | codedown python | poetry run python 
@@ -20,7 +25,6 @@ lint:
 # run tests
 test:
   poetry run pytest
-
 
 # build documentation 
 docs:
