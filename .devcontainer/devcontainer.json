@@ -1,0 +1,4 @@
+{
+    "postCreateCommand": "bash .devcontainer/post_create.sh",
+    "forwardPorts": [8501],
+}
