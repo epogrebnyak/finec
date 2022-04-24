@@ -14,8 +14,6 @@ pip install git+https://github.com/epogrebnyak/finec.git
 
 Get Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices as pandas dataframe. 
 
-`(*)` denotes lower level functions, skip at first reading.
-
 ### Stocks
 
 ```python
@@ -46,7 +44,7 @@ from finec.moex import Bond
 # Sistema 2027 bond price and yields from TQCB trading bord
 Bond(ticker="RU000A0JXN21", board="TQCB").get_history()
 
-# (*) What data columns are provided provide for trading history?
+# What data columns are provided provide for trading history?
 Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
 ```
 
