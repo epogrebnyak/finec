@@ -1,5 +1,9 @@
 package := "finec"
 
+# run code from README
+readme:
+  cat README.md | codedown python | poetry run python 
+
 # format markdown
 prettier:
   npx prettier --write .
