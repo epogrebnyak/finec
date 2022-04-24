@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+git config pull.rebase true
+
 # use poetry and install dependecies
 pip install poetry
 poetry install
