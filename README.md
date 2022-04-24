@@ -2,7 +2,7 @@
 
 # finec
 
-Financial data and computation utilities for Finec MGIMO students.
+Financial data and financial computation utilities for Finec MGIMO students.
 
 ## Installation
 
@@ -10,40 +10,97 @@ Financial data and computation utilities for Finec MGIMO students.
 pip install git+https://github.com/epogrebnyak/finec.git
 ```
 
-## Minimal examples
+## Moscow Exchange (MOEX)
 
-Get Moscow Exchange (MOEX) trading history for stocks, bonds or currencies as pandas dataframe:
+Get Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices as pandas dataframe. 
+
+`(*)` denotes lower level functions, skip at first reading.
+
+### Stocks
 
 ```python
-from finec.moex import Bond, Currency, Stock, Index
+from finec.moex import Stock, Index
+from finec.dividend import get_dividend
+
+# What stocks are in IMOEX index? 
+Index("IMOEX").composition()
+
+# Aeroflot stock information
+Stock("AFLT").whoami()
+
+# Ozon stock price history
+Stock("OZON").get_history(columns=["TRADEDATE", "CLOSE"])
 
 # Yandex stock price
-Stock("YNDX").get_history()
+Stock("YNDX").get_history(start="2022-01-01")
 
-# Sistema 2027 bond price and yields
+# Get dividend history from https://github.com/WLM1ke/poptimizer
+get_dividend(ticker="GMKN")
+```
+
+### Bonds
+
+```python 
+from finec.moex import Bond
+
+# Sistema 2027 bond price and yields from TQCB trading bord
 Bond(ticker="RU000A0JXN21", board="TQCB").get_history()
+
+# (*) What data columns are provided provide for trading history?
+Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
+```
+
+### Currencies
+
+```python
+from finec.moex import Currency, usd_rur, eur_rur, cny_rur 
 
 # USDRUR exchange rate
 Currency("USD000UTSTOM").get_history(start="2020-01-01")
 
-# Key MOEX stock index
-Index("IMOEX").get_history()
-Index("IMOEX").composition()
+# Tickers for euro and yuan exchange rates
+eur_rur().ticker
+cny_rur().ticker
 ```
 
-## Other functions
+### Lookup functions
 
 ```python 
-from finec import get_dividend
+from finec.moex import describe, find, traded_boards
 
-# get stock dividend history from https://github.com/WLM1ke/poptimizer
-div_df = get_dividend(temp_filepath="dividend.csv")
+# General information about ticker
+describe("YNDX")  
+
+# What boards does a security trade at?
+traded_boards("MTSS")
+
+# Are there traded securities with *query_str* in description?
+find(query_str="Челябинский", is_traded=True)
 ```
 
+### Markets and boards
 
-## More examples
+```python 
+from finec.moex import Market, Board
 
-See [example.py](example.py)
+m = Market(engine="stock", market="shares")
+m.traded_boards()
+
+b = Board(engine="stock", market="shares", board="TQBR")
+```
+
+### More about MOEX data
+
+References:
+
+- MOEX API reference <https://iss.moex.com/iss/reference/?lang=en>
+- Developper manual (2016) <https://fs.moex.com/files/6523>
+
+Notes: 
+
+- MOEX API is very generious to provide a lot of data for free and without any registration or tokens. 
+- API provided on "as is" basis, some parts are undocumented.
+
 
 ## Aknowledgements
 

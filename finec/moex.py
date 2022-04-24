@@ -54,16 +54,11 @@ Supplementary questions:
 Unanswered:
 
 - How can I get a nice dataset of the bonds market yields and durations?
-- Is there any documentation?
-  See references in https://github.com/WLM1ke/apimoex
-- What is index composition and weights?
-- Why do column lists differ across endpoints?
-- Is MOEX ISS API documented?
 - Can MOEX bond yield calculation be trusted?
+- Why do column lists differ across endpoints?
 - Can issuer ticker be linked to company tax number?
 - Are government bonds included in TQCB board?
 - Why are there so many boards?
-- Where can I get the dividend data?
 """
 
 from dataclasses import dataclass, field
@@ -218,6 +213,10 @@ class Board(Market):
     @property
     def history_endpoint(self):
         return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
+
+
+def securities(endpoint: str):  # not tested
+    return get(endpoint + "/securities")
 
 
 def make_query_dict(columns, start, end):

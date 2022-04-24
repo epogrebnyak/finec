@@ -1,5 +1,6 @@
 import itertools
-from finec.moex import save_generator, yield_fields, Stock, Index
+
+from finec.moex import Index, Stock, save_generator, yield_fields
 
 # runs several minutes
 tickers = Index("IMOEX").tickers()
