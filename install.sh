@@ -1,10 +1,13 @@
 #!/bin/bash 
 
+pip install poetry
+
 # create ~/bin
 mkdir -p ~/bin
 
 # download and extract just to ~/bin/just
 curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/bin
+
 
 # add `~/bin` to the paths that your shell searches for executables
 # this line should be added to your shells initialization file,
