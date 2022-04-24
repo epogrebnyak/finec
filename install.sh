@@ -1,7 +1,8 @@
 #!/bin/bash 
 
-# use poetry
+# use poetry and install dependecies
 pip install poetry
+poetry install
 
 # use just
 # create ~/bin
