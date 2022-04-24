@@ -1,4 +1,5 @@
 [![Tests](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml/badge.svg)](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml)
+![Finec version](https://badgen.net/pypi/v/finec)
 
 # finec
 
