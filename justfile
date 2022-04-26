@@ -1,5 +1,9 @@
 package := "finec"
 
+# list available commands
+list:
+  just --list
+  
 # publish to PyPI
 publish:
   export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
