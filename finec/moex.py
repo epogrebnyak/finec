@@ -10,7 +10,7 @@ Installation:
 
 Retrieve daily quotes by instrument as pandas dataframes:
 
-  from finec.moex import Stock, Bond, Currency, dataframe, find
+  from finec.moex import Stock, Bond, Currency, find
 
   Stock("YNDX").get_history()
   Bond(ticker="RU000A101NJ6", board="TQIR").get_history()
@@ -84,7 +84,6 @@ __all__ = [
     "usd_rur",
     "eur_rur",
     "cny_rur",
-    "dataframe",
 ]
 
 
@@ -126,13 +125,16 @@ class Query:
     def url(self):
         return qualified(self.endpoint)
 
+    def client(self, session):
+        return ISSClient(session, self.url, self.param)
+
     def get(self):
         with requests.Session() as session:
-            return ISSClient(session, self.url, self.param).get()
+            return self.client(session).get()
 
     def get_all(self):
         with requests.Session() as session:
-            return ISSClient(session, self.url, self.param).get_all()
+            return self.client(session).get_all()
 
 
 def find(query_str: str, is_traded=True):
@@ -168,6 +170,18 @@ def history_endpoint(engine, market, board="", ticker=""):
     return endpoint("/iss/history", engine, market, board, ticker)
 
 
+def dataframe(json_dict: Dict) -> pd.DataFrame:
+    df = pd.DataFrame(json_dict)
+    if "TRADEDATE" in df.columns:
+        df["TRADEDATE"] = pd.to_datetime(df["TRADEDATE"])
+        df = df.set_index("TRADEDATE")
+    date_cols = ["MATDATE", "OFFERDATE", "BUYBACKDATE"]
+    for col in date_cols:
+        if col in df.columns:
+            df[col] = df[col].map(as_date)
+    return df
+
+
 @dataclass
 class Market:
     engine: str
@@ -184,11 +198,25 @@ class Market:
     def describe(self):
         return get(self.endpoint)
 
-    def securities(self) -> Dict:
-        return get(self.endpoint + "/securities")
+    def securities(self) -> pd.DataFrame:
+        # /securities endpoint returns dict with following keys:
+        # ['securities', 'marketdata', 'dataversion', 'marketdata_yields']
+        #  securities - returned by this method
+        #  marketdata is not meaningful data
+        #  dataversion is a timestamp
+        #  marketdata_yields is non-empty for bonds- returned by yields
+        return dataframe(get(self.endpoint + "/securities")["securities"])
 
-    def securities_history(self) -> Dict:
-        return get(self.history_endpoint + "/securities")
+    def yields(self) -> pd.DataFrame:
+        return dataframe(get(self.endpoint + "/securities")["marketdata_yields"])
+
+    # Note: very slow method
+    def history_json(self) -> List:
+        return get_all(self.history_endpoint + "/securities")["history"]
+
+    # Note: very slow method
+    def history(self) -> pd.DataFrame:
+        return dataframe(self.history_json())
 
     def _boards(self) -> List:
         return get(self.endpoint + "/boards")["boards"]
@@ -364,22 +392,37 @@ def cny_rur():
 
 
 def get_bonds():
+    """
+    Equivalent to Market(engine='stock', market='bonds').securities()
+    """
     return get("/iss/engines/stock/markets/bonds/securities")["securities"]
 
 
 def get_bond_yields():
+    """
+    Equivalent to Market(engine='stock', market='bonds').yields()
+    """
     return get("/iss/engines/stock/markets/bonds/securities")["marketdata_yields"]
 
 
 def get_stocks():
+    """
+    Equivalent to Market(engine='stock', market='shares').securities()
+    """
     return get("/iss/engines/stock/markets/shares/securities")["securities"]
 
 
 def get_currencies():  # not tested
+    """
+    Equivalent to Market(engine='currency', market='selt').securities()
+    """
     return get("/iss/engines/currency/markets/selt/securities")["securities"]
 
 
 def get_indices():
+    """
+    Equivalent to Market(engine='currency', market='index').securities()
+    """
     return get("/iss/engines/stock/markets/index/securities")["securities"]
 
 
@@ -390,28 +433,17 @@ def as_date(s: str) -> Union[pd.Timestamp, NAType]:
         return pd.NA
 
 
-def dataframe(json_dict: Dict) -> pd.DataFrame:
-    df = pd.DataFrame(json_dict)
-    if "TRADEDATE" in df.columns:
-        df["TRADEDATE"] = pd.to_datetime(df["TRADEDATE"])
-        df = df.set_index("TRADEDATE")
-    date_cols = ["MATDATE", "OFFERDATE", "BUYBACKDATE"]
-    for col in date_cols:
-        if col in df.columns:
-            df[col] = df[col].map(as_date)
-    return df
-
-
-def yield_fields(cls, tickers, field="CLOSE"):
+def _yield_jsons_by_field(security_class, tickers, field):
     import tqdm
 
-    columns = ["TRADEDATE", "SECID"] + [field]
+    columns = ["TRADEDATE", "SECID", field]
     for t in tqdm.tqdm(tickers):
-        for j in cls(t).get_history_json(columns):
+        for j in security_class(t).get_history_json(columns):
             if j[field]:
                 yield j
 
 
-def save_generator(filename, gen, field):
+def save_tickers(path, security_class, tickers, field):
+    gen = _yield_jsons_by_field(security_class, tickers, field="CLOSE")
     df = pd.DataFrame(gen).pivot(index="TRADEDATE", columns="SECID", values=field)
-    df.to_csv(filename)
+    df.to_csv(path)
