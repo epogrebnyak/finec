@@ -24,11 +24,11 @@ def read(filepath):
 def cache_factory(from_web, to_file, from_file, default_filename):
     def f(filename: str, directory: str, overwrite: bool = False):
         if not directory:
-            temp_dir = Path(appdirs.user_cache_dir())
+            directory = Path(appdirs.user_cache_dir())
         if not Path(directory).exists():
             raise FileNotFoundError(f"{directory} does not exist.")
         if not filename:
-            temp_filename = default_filename
+            filename = default_filename
         filepath = Path(directory) / filename
         if overwrite or not filepath.exists():
             df = from_web()

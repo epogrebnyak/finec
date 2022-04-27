@@ -28,15 +28,18 @@ User questions:
 - What classes of securities are available?
   Stock, Bond, Index, Currency
 
-- What is the ticker list for this class of security (eg all tickers for stocks)?
-  status: not implemented, superceded by next question
+
+- What is the ticker list for this class of security (eg tickers for all traded stocks)?
+
+  Market("stock", "shares").securities().query('PREVWAPRICE > 0').SECID.unique().tolist()
 
 - What are the latest quotes for all securities of the class (eg all corporate bonds)?
-  status: experimental
-  unclear of the source - market/secirities or board/securities?
-                          and /iss and /iss/history base
+
+  Market("stock", "shares").securities()
+  Market("stock", "shares").history()
 
 - What is the quote history for a security (eg YNDX, AFLT, SBER, MTSS or RU000A101NJ6)?
+
   status: implemented, tested
 
 Supplementary questions:

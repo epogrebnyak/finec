@@ -9,3 +9,8 @@ def test_get_dividend_all(tmpdir):
 def test_get_dividend(tmpdir):
     df2 = get_dividend("AFLT", str(tmpdir), "div.csv", overwrite=True)
     assert len(df2) >= 3
+
+
+def test_get_dividend_all_no_param():
+    df = get_dividend_all()
+    assert len(df) >= 2387
