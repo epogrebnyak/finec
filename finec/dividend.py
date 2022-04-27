@@ -22,14 +22,14 @@ def read(filepath):
 
 
 def cache_factory(from_web, to_file, from_file, default_filename):
-    def f(temp_filename: str, temp_dir: str, overwrite: bool = False):
-        if not temp_dir:
+    def f(filename: str, directory: str, overwrite: bool = False):
+        if not directory:
             temp_dir = Path(appdirs.user_cache_dir())
-        if not Path(temp_dir).exists():
-            raise FileNotFoundError(f"{temp_dir} does not exist.")
-        if not temp_filename:
+        if not Path(directory).exists():
+            raise FileNotFoundError(f"{directory} does not exist.")
+        if not filename:
             temp_filename = default_filename
-        filepath = Path(temp_dir) / temp_filename
+        filepath = Path(directory) / filename
         if overwrite or not filepath.exists():
             df = from_web()
             to_file(df, filepath)
@@ -38,24 +38,22 @@ def cache_factory(from_web, to_file, from_file, default_filename):
     return f
 
 
-def get_dividend_all(
-    temp_dir: str = "", temp_filename: str = "", overwrite: bool = False
-):
-    return get_dividend(None, temp_dir, temp_filename, overwrite)
+def get_dividend_all(directory: str = "", filename: str = "", overwrite: bool = False):
+    return get_dividend(None, directory, filename, overwrite)
 
 
 def get_dividend(
-    ticker="", temp_dir: str = "", temp_filename: str = "", overwrite: bool = False
+    ticker="", directory: str = "", filename: str = "", overwrite: bool = False
 ):
     """Return dividend information from WLM1ke/poptimizer as dataframe.
        Subset by *ticker*, if *ticker* is provided.
 
     Caching:
-      - Uses cached data *temp_dir/temp_filename*.
-      - Will read from local *temp_dir/temp_filename*, if exists.
-      - If *temp_dir/temp_filename* does not exist will download data
-        and save it to *temp_dir/temp_filename*.
-      - Same behaviour if `overwrite=True`.
+      - Uses cached data *directory/filename*.
+      - Will read from local *directory/filename*, if exists.
+      - If *directory/filename* does not exist will download data
+        and save it to *directory/filename*. Same behaviour
+        if `overwrite=True`.
 
     Example:
 
@@ -68,9 +66,9 @@ def get_dividend(
         from_web=query_dividend_from_web,
         to_file=save,
         from_file=read,
-        default_filename="moex_dividend.csv",
+        default_filename="dividend.csv",
     )
-    df = f(temp_filename, temp_dir, overwrite)
+    df = f(filename, directory, overwrite)
     if ticker:
         df = df[df.ticker == ticker].sort_values("date", ascending=True)
     return df

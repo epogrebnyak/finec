@@ -222,6 +222,11 @@ def test_traded_boards():
     ]
 
 
+def test_market_methods():
+    m = moex.Market("stock", "bonds")
+    assert len(m.securities()) >= len(m.yields())
+
+
 def test_market_traded_boards():
     assert list(moex.Market("stock", "shares").traded_boards().keys()) == [
         "SMAL",

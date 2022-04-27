@@ -1,5 +1,7 @@
 # pip install git+https://github.com/epogrebnyak/finec.git
 
-from finec.moex import traded_boards
+from finec.moex import traded_boards, Market, dataframe
 
-print(traded_boards("AFLT").keys())
+# m = Market("stock", "shares")
+m = Market("stock", "bonds")
+sec = m.history()

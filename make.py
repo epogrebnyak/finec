@@ -1,12 +1,15 @@
 import itertools
 
-from finec.moex import Index, Stock, save_generator, yield_fields
+from finec.moex import Index, Stock, save_tickers
 from finec.dividend import get_dividend_all
 
-# create dividend file
-get_dividend_all(temp_dir="datasets", temp_filename="dividend.csv", overwrite=True)
+# Create dividend file
+get_dividend_all(directory="datasets", filename="dividend.csv", overwrite=True)
 
-# create IMOEX quotes - runs several minutes
-tickers = Index("IMOEX").tickers()
-gen = yield_fields(Stock, tickers, "CLOSE")
-save_generator("datasets/IMOEX_CLOSE.csv", gen, "CLOSE")
+# Create IMOEX memeber comnpany CLOSE prices - runs several minutes
+save_tickers(
+    path="datasets/IMOEX_CLOSE.csv",
+    security_class=Stock,
+    tickers=Index("IMOEX").tickers(),
+    field="CLOSE",
+)
