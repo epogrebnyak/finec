@@ -218,6 +218,7 @@ def test_traded_boards():
         "PSRD",
         "PSRE",
         "LIQB",
+        "SOTC",
     ]
 
 

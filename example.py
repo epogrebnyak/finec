@@ -1,5 +1,5 @@
 # pip install git+https://github.com/epogrebnyak/finec.git
 
-from finec.dividend import get_dividend_all
+from finec.moex import traded_boards
 
-get_dividend_all(temp_dir="datasets", temp_filename="dividend.csv", overwrite=True)
+print(traded_boards("AFLT").keys())
