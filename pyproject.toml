@@ -27,6 +27,7 @@ pytest = "^7.1.1"
 isort = "^5.10.1"
 black = "^22.3.0"
 streamlit = "^1.8.1"
+altair = "^4.2.0"
 
 
 [build-system]

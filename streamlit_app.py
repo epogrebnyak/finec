@@ -23,10 +23,21 @@ def composition_df() -> pd.DataFrame:
 
 
 cols = "ticker shortnames weight".split()
-imoex_df = (composition_df()[cols]
-    .sort_values("weight", ascending=False)
-    .reset_index(drop=True)
+imoex_df = (
+    composition_df()[cols].sort_values("weight", ascending=False).reset_index(drop=True)
 )
+imoex_df.index += 1
+
+import altair as alt
+
+c = (
+    alt.Chart(imoex_df)
+    .mark_bar()
+    .encode(x="weight", y=alt.Y("ticker", sort="-x"), tooltip=["ticker", "weight"])
+)
+
+st.altair_chart(c, use_container_width=True)
+
 st.dataframe(imoex_df)
 
 # TODO: "Скачать данные (CSV, Excel)"
