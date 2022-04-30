@@ -195,31 +195,35 @@ def test_whoami():
 
 
 def test_traded_boards():
-    assert list(moex.traded_boards("AFLT").keys()) == [
-        "TQBR",
-        "SPEQ",
-        "SMAL",
-        "TQDP",
-        "RPMO",
-        "PTEQ",
-        "PSEQ",
-        "RPEU",
-        "RPEO",
-        "EQRD",
-        "EQRE",
-        "EQWP",
-        "EQWD",
-        "EQWE",
-        "EQRP",
-        "LIQR",
-        "EQRY",
-        "PSRY",
-        "PSRP",
-        "PSRD",
-        "PSRE",
-        "LIQB",
-        "SOTC",
-    ]
+    res = set(moex.traded_boards("AFLT").keys())
+    if "SOTC" in res:
+        res.remove("SOTC")
+    assert res == set(
+        [
+            "TQBR",
+            "SPEQ",
+            "SMAL",
+            "TQDP",
+            "RPMO",
+            "PTEQ",
+            "PSEQ",
+            "RPEU",
+            "RPEO",
+            "EQRD",
+            "EQRE",
+            "EQWP",
+            "EQWD",
+            "EQWE",
+            "EQRP",
+            "LIQR",
+            "EQRY",
+            "PSRY",
+            "PSRP",
+            "PSRD",
+            "PSRE",
+            "LIQB",
+        ]
+    )
 
 
 def test_market_methods():
