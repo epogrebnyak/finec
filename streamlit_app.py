@@ -1,4 +1,6 @@
 import streamlit as st
+from finec.moex import Index
+import pandas as pd
 
 """Демонстрация возможностей библиотеки finec:
 
@@ -14,12 +16,17 @@ st.header("Акции")
 
 """Какие акции входят в состав индекса Мосбиржи и с какими весами?"""
 
-from finec.moex import Index
-import pandas as pd
 
-imoex_dict = Index("IMOEX").composition()
+@st.cache
+def composition_df() -> pd.DataFrame:
+    return pd.DataFrame(Index("IMOEX").composition())
+
+
 cols = "ticker shortnames weight".split()
-imoex_df = pd.DataFrame(imoex_dict)[cols].sort_values("weight", ascending=False).reset_index(drop=True)
+imoex_df = (composition_df()[cols]
+    .sort_values("weight", ascending=False)
+    .reset_index(drop=True)
+)
 st.dataframe(imoex_df)
 
 # TODO: "Скачать данные (CSV, Excel)"
@@ -29,7 +36,6 @@ st.dataframe(imoex_df)
 """По каким акциям идет наибольший объем торгов?"""
 
 # Дата обновления
-
 
 
 st.header("Облигации")
