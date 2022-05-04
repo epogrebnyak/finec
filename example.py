@@ -17,3 +17,11 @@ industries = dict(
     telecom="MTSS RTKM",
     power="HYDR IRAO FEES ENPG",
 )
+
+
+def industry(ticker):
+    d = {v: k for k, vs in industries.items() for v in vs.split()}
+    return d.get(ticker, "not specified")
+
+
+assert industry(ticker="HYDR") == "power"

@@ -324,6 +324,25 @@ class Stock(Security):
     ]
 
 
+industries = dict(
+    oilgas="GAZP LKOH SNGS SNGSP TATN TATNP NVTK TRNFP ROSN",
+    retail="FIVE FIXP DSKY MGNT",
+    mm="ALRS GMKN NLMK RUAL POLY CHMF PLZL MAGN POGR PHOR",
+    finance="MOEX TCSG SBER SBERP VTBR CBOM",
+    construction="PIKK",
+    diversified="AFKS",
+    transport="AFLT GLTR",
+    technology="HHRU OZON YNDX VKCO",
+    telecom="MTSS RTKM",
+    power="HYDR IRAO FEES ENPG",
+)
+
+
+def industry(ticker):
+    d = {v: k for k, vs in industries.items() for v in vs.split()}
+    return d.get(ticker, "not specified")
+
+
 @dataclass
 class Bond(Security):
     ticker: str
