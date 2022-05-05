@@ -72,6 +72,8 @@ import requests
 from apimoex import ISSClient
 from pandas._libs.missing import NAType
 
+from finec.dividend import get_dividend
+
 __all__ = [
     "find",
     "describe",
@@ -322,6 +324,9 @@ class Stock(Security):
         "VALUE",
         "VOLUME",
     ]
+
+    def get_dividend(self):
+        return get_dividend(self.ticker)
 
 
 industries = dict(
