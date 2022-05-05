@@ -27,11 +27,11 @@ Index("IMOEX").composition()
 # Aeroflot stock information
 Stock("AFLT").whoami()
 
-# Ozon stock price history
-Stock("OZON").get_history(columns=["TRADEDATE", "CLOSE"])
+# Ozon stock price history, all dates and columns
+Stock("OZON").get_history()
 
-# Yandex stock price
-Stock("YNDX").get_history(start="2022-01-01")
+# Yandex stock price, restricted by date and column
+Stock("YNDX").get_history(columns=["TRADEDATE", "CLOSE"], start="2022-01-01")
 
 # Get dividend history from https://github.com/WLM1ke/poptimizer
 get_dividend(ticker="GMKN")
@@ -45,7 +45,7 @@ from finec.moex import Bond
 # Sistema 2027 bond price and yields from TQCB trading bord
 Bond(ticker="RU000A0JXN21", board="TQCB").get_history()
 
-# What data columns are provided provide for trading history?
+# What data columns are provided for trading history?
 Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
 ```
 
