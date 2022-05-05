@@ -13,33 +13,32 @@ pip install git+https://github.com/epogrebnyak/finec.git
 
 ## Moscow Exchange (MOEX)
 
-Get Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices as pandas dataframe. 
+Get Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices as pandas dataframe.
 
 ### Stocks
 
 ```python
 from finec.moex import Stock, Index
-from finec.dividend import get_dividend
 
-# What stocks are in IMOEX index? 
+# What stocks are part of IMOEX index?
 Index("IMOEX").composition()
 
-# Aeroflot stock information
+# General information about Aeroflot stock
 Stock("AFLT").whoami()
 
 # Ozon stock price history, all dates and columns
 Stock("OZON").get_history()
 
-# Yandex stock price, restricted by date and column
+# Yandex stock price, restricted by columns and start date
 Stock("YNDX").get_history(columns=["TRADEDATE", "CLOSE"], start="2022-01-01")
 
 # Get dividend history from https://github.com/WLM1ke/poptimizer
-get_dividend(ticker="GMKN")
+Stock("GMKN").get_dividend()
 ```
 
 ### Bonds
 
-```python 
+```python
 from finec.moex import Bond
 
 # Sistema 2027 bond price and yields from TQCB trading bord
@@ -52,7 +51,7 @@ Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
 ### Currencies
 
 ```python
-from finec.moex import Currency, usd_rur, eur_rur, cny_rur 
+from finec.moex import Currency, usd_rur, eur_rur, cny_rur
 
 # USDRUR exchange rate
 Currency("USD000UTSTOM").get_history(start="2020-01-01")
@@ -64,11 +63,11 @@ cny_rur().ticker
 
 ### Lookup functions
 
-```python 
+```python
 from finec.moex import describe, find, traded_boards
 
 # General information about ticker
-describe("YNDX")  
+describe("YNDX")
 
 # What boards does a security trade at?
 traded_boards("MTSS")
@@ -79,7 +78,7 @@ find(query_str="Челябинский", is_traded=True)
 
 ### Markets and boards
 
-```python 
+```python
 from finec.moex import Market, Board
 
 m = Market(engine="stock", market="shares")
@@ -95,11 +94,10 @@ References:
 - MOEX API reference <https://iss.moex.com/iss/reference/?lang=en>
 - Developper manual (2016) <https://fs.moex.com/files/6523>
 
-Notes: 
+Notes:
 
-- MOEX API is very generious to provide a lot of data for free and without any registration or tokens. 
+- MOEX API is very generious to provide a lot of data for free and without any registration or tokens.
 - API provided on "as is" basis and some parts are undocumented.
-
 
 ## Aknowledgements
 
