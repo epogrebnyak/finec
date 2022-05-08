@@ -5,6 +5,10 @@
 
 Financial data and financial computation utilities for Finec MGIMO students.
 
+## Demo
+
+<https://share.streamlit.io/epogrebnyak/finec/main>
+
 ## Installation
 
 ```console
