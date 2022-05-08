@@ -1,4 +1,6 @@
 streamlit==0.69.2
+altair
 apimoex
 appdirs
+bson
 pandas
