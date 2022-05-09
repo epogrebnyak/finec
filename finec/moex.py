@@ -275,12 +275,38 @@ def currencies_board(board) -> Board:
     return Markets.currency.make_board(board)
 
 
-DEFAULT_BOARDS = dict(
-    stocks=stocks_board("TQBR"),
-    corporate_bonds=bonds_board("TQCB"),
-    federal_bonds=bonds_board("TQOB"),
-    currencies=currencies_board("CETS"),
-)
+def default_board_stock():
+    return stocks_board("TQBR")
+
+
+def default_board_corporate_bonds():
+    return bonds_board("TQCB")
+
+
+def default_board_federal_bonds():
+    return bonds_board("TQOB")
+
+
+def default_board_currencies():
+    return currencies_board("CETS")
+
+
+def bond_prices(b: Board) -> pd.DataFrame:
+    # fmt: off
+    columns = [
+           'BOARDID', 'SHORTNAME', 'SECID',
+           'NUMTRADES', 'VALUE', 'VOLUME', 'CLOSE',
+           'ACCINT', 'COUPONPERCENT', 'COUPONVALUE',
+           'YIELDCLOSE', 'YIELDTOOFFER', 'YIELDLASTCOUPON',
+           'MATDATE', 'OFFERDATE', 'DURATION',
+           'BUYBACKDATE', 'LASTTRADEDATE',
+           'FACEVALUE', 'CURRENCYID', 'FACEUNIT']
+    # fmt: on
+    return b.history().query("NUMTRADES>0")[columns]
+
+
+def bond_yields(b: Board) -> pd.DataFrame:
+    return b.yields().drop(columns="IR ICPI BEI CBR SEQNUM".split())
 
 
 def securities(endpoint: str):  # not tested
