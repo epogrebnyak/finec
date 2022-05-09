@@ -275,7 +275,7 @@ def currencies_board(board) -> Board:
     return Markets.currency.make_board(board)
 
 
-def default_board_stock():
+def default_board_stocks():
     return stocks_board("TQBR")
 
 
