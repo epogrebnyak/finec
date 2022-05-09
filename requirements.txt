@@ -3,4 +3,5 @@ altair
 apimoex
 appdirs
 bson
+matplotlib
 pandas

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "finec"
-version = "0.1.6"
+version = "0.1.7"
 description = "Computational finance from Finec MGIMO"
 authors = ["Evgeniy Pogrebnyak <e.pogrebnyak@gmail.com>"]
 readme = "README.md"
@@ -17,6 +17,7 @@ tqdm = "^4.64.0"
 appdirs = "^1.4.4"
 httpx = "^0.22.0"
 python-dotenv = "^0.20.0"
+matplotlib = "^3.5.2"
 
 
 [tool.poetry.dev-dependencies]
