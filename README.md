@@ -1,5 +1,5 @@
 [![Tests](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml/badge.svg)](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml)
-![Finec version](https://badgen.net/pypi/v/finec)
+[![Finec version](https://badgen.net/pypi/v/finec)](https://pypi.org/project/finec/)
 
 # finec
 
@@ -17,7 +17,8 @@ pip install git+https://github.com/epogrebnyak/finec.git
 
 ## Moscow Exchange (MOEX)
 
-Get Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices as pandas dataframe.
+Download Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices 
+and pandas dataframes, CSV or Excel files.
 
 ### Stocks
 
@@ -89,6 +90,8 @@ m = Market(engine="stock", market="shares")
 m.traded_boards()
 
 b = Board(engine="stock", market="shares", board="TQBR")
+b.securities()
+b.history()
 ```
 
 ### More about MOEX data
