@@ -39,8 +39,6 @@ def button_donwload_csv(df, filename="file.csv"):
     )
 
 
-
-
 st.header("Акции")
 
 st.subheader("Какие акции входят в состав индекса Мосбиржи и с какими весами?")
@@ -71,13 +69,13 @@ n_companies = st.slider(
     step=1,
 )
 if n_companies < len(imoex_df):
-  pct = imoex_df.iloc[:n_companies, :].weight.sum()
-  st.write(
-      f"Крупнейшие по капитализации {n_companies} компаний "
-      f"составляют {pct:.1f}% индекса Московской биржи."
-  )
+    pct = imoex_df.iloc[:n_companies, :].weight.sum()
+    st.write(
+        f"Крупнейшие по капитализации {n_companies} компаний "
+        f"составляют {pct:.1f}% индекса Московской биржи."
+    )
 else:
-  st.write(f"В состав индекса Московской биржи входят {len(imoex_df)} компании.")
+    st.write(f"В состав индекса Московской биржи входят {len(imoex_df)} компании.")
 
 c = (
     alt.Chart(imoex_df.iloc[:n_companies, :])
@@ -99,13 +97,13 @@ st.dataframe(imoex_df.iloc[:n_companies, :])
 
 st.subheader("Узнать про тикер")
 
-random_ticker = "IRAO" # imoex_df.sample(1).ticker.iloc[0]
+random_ticker = "IRAO"  # imoex_df.sample(1).ticker.iloc[0]
 ticker = st.text_input("Введите тикер:", random_ticker)
 if ticker:
     describe_dict = whoami(ticker)
     st.write(describe_dict["TYPENAME"], describe_dict["NAME"])
     with st.expander("Больше информации", expanded=False):
-       st.write(describe_dict)
+        st.write(describe_dict)
 
 
 # """Сколько компаний торгуется на Московской бирже?"""

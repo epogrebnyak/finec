@@ -1,6 +1,17 @@
 from finec import moex
 
 
+def test_default_boards():
+    from finec.moex import Board, DEFAULT_BOARDS
+
+    assert DEFAULT_BOARDS == {
+        "stocks": Board(engine="stock", market="shares", board="TQBR"),
+        "corporate_bonds": Board(engine="stock", market="bonds", board="TQCB"),
+        "federal_bonds": Board(engine="stock", market="bonds", board="TQOB"),
+        "currencies": Board(engine="currency", market="selt", board="CETS"),
+    }
+
+
 def find_by_secid():  # will expire
     assert moex.find("RU000A101NJ6") == [
         {
@@ -268,8 +279,10 @@ def test_currency_history():
         }
     ]
 
+
 def test_industry():
     assert moex.industry(ticker="HYDR") == "power"
+
 
 def test_index_history():
     assert moex.Index("IMOEX").get_history_json(

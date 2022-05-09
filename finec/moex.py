@@ -145,7 +145,7 @@ class Query:
 def find(query_str: str, is_traded=True):
     param = dict(q=query_str)
     param["is_trading"] = "1" if is_traded else "0"
-    # Note: possibly still limits output to 100 items
+    # Note: possibly limits output to 100 items regardless of get_all
     return get_all(endpoint="/iss/securities", param=param)["securities"]
 
 
@@ -157,12 +157,12 @@ def whoami(ticker: str):
     return {d["name"]: d["value"] for d in describe_json(ticker)}
 
 
-def board_dict(ticker: str):
+def all_boards(ticker: str):
     return get(f"/iss/securities/{ticker}")["boards"]
 
 
 def traded_boards(ticker: str):
-    return {d["boardid"]: d["title"] for d in board_dict(ticker) if d["is_traded"] == 1}
+    return {d["boardid"]: d["title"] for d in all_boards(ticker) if d["is_traded"] == 1}
 
 
 def endpoint(base, engine, market, board="", ticker=""):
@@ -219,22 +219,33 @@ class Market:
     def yields(self) -> pd.DataFrame:
         return dataframe(get(self.endpoint + "/securities")["marketdata_yields"])
 
-    # Note: very slow method
+    # Note: very slow method, usage not recommended
     def history_json(self) -> List:
         return get_all(self.history_endpoint + "/securities")["history"]
 
-    # Note: very slow method
+    # Note: very slow method, usage not recommended
     def history(self) -> pd.DataFrame:
         return dataframe(self.history_json())
 
-    def _boards(self) -> List:
+    def make_board(self, board: str):
+        return Board(self.engine, self.market, board)
+
+    def boards_json(self) -> List:
         return get(self.endpoint + "/boards")["boards"]
 
-    def boards(self):
-        return {d["boardid"]: d["title"] for d in self._boards()}
+    def all_boards(self):
+        return {d["boardid"]: d["title"] for d in self.boards_json()}
 
     def traded_boards(self):
-        return {d["boardid"]: d["title"] for d in self._boards() if d["is_traded"] == 1}
+        return {
+            d["boardid"]: d["title"] for d in self.boards_json() if d["is_traded"] == 1
+        }
+
+
+class Markets:
+    stocks = Market("stock", "shares")
+    bonds = Market("stock", "bonds")
+    currency = Market("currency", "selt")
 
 
 @dataclass
@@ -252,8 +263,24 @@ class Board(Market):
         return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
 
 
-def stock_board(board="TQBR"):
-    return Board("stock", "shares", board)
+def stocks_board(board: str) -> Board:
+    return Markets.stocks.make_board(board)
+
+
+def bonds_board(board: str) -> Board:
+    return Markets.bonds.make_board(board)
+
+
+def currencies_board(board) -> Board:
+    return Markets.currency.make_board(board)
+
+
+DEFAULT_BOARDS = dict(
+    stocks=stocks_board("TQBR"),
+    corporate_bonds=bonds_board("TQCB"),
+    federal_bonds=bonds_board("TQOB"),
+    currencies=currencies_board("CETS"),
+)
 
 
 def securities(endpoint: str):  # not tested
@@ -426,35 +453,35 @@ def cny_rur():
     return Currency("CNYRUB_TOM")
 
 
-def get_bonds():
+def get_bonds_market():
     """
     Equivalent to Market(engine='stock', market='bonds').securities()
     """
     return get("/iss/engines/stock/markets/bonds/securities")["securities"]
 
 
-def get_bond_yields():
+def get_bond_market_yields():
     """
     Equivalent to Market(engine='stock', market='bonds').yields()
     """
     return get("/iss/engines/stock/markets/bonds/securities")["marketdata_yields"]
 
 
-def get_stocks():
+def get_stocks_market():
     """
     Equivalent to Market(engine='stock', market='shares').securities()
     """
     return get("/iss/engines/stock/markets/shares/securities")["securities"]
 
 
-def get_currencies():  # not tested
+def get_currencies_market():  # not tested
     """
     Equivalent to Market(engine='currency', market='selt').securities()
     """
     return get("/iss/engines/currency/markets/selt/securities")["securities"]
 
 
-def get_indices():
+def get_indices_market():
     """
     Equivalent to Market(engine='currency', market='index').securities()
     """
@@ -468,7 +495,7 @@ def as_date(s: str) -> Union[pd.Timestamp, NAType]:
         return pd.NA
 
 
-def _yield_jsons_by_field(security_class, tickers, field):
+def yield_jsons_by_field(security_class, tickers, field):
     import tqdm
 
     columns = ["TRADEDATE", "SECID", field]
@@ -479,6 +506,6 @@ def _yield_jsons_by_field(security_class, tickers, field):
 
 
 def save_tickers(path, security_class, tickers, field):
-    gen = _yield_jsons_by_field(security_class, tickers, field="CLOSE")
+    gen = yield_jsons_by_field(security_class, tickers, field="CLOSE")
     df = pd.DataFrame(gen).pivot(index="TRADEDATE", columns="SECID", values=field)
     df.to_csv(path)
