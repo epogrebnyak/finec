@@ -31,9 +31,10 @@ class Financials:
 
 if __name__ == "__main__":
     # NEXT: use https://requests-cache.readthedocs.io/en/stable/
-    from dotenv import load_dotenv, get_key
     import pathlib
     from pathlib import Path
+
+    from dotenv import get_key, load_dotenv
 
     file = Path(__file__).parent / "ofdata.env"
     env_text = file.read_text()

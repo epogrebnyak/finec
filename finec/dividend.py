@@ -6,6 +6,9 @@ import pandas as pd
 import requests
 
 
+from finec.directory import local_directory
+
+
 def query_dividend_from_web() -> pd.DataFrame:
     url_div = "https://github.com/WLM1ke/poptimizer/blob/master/dump/source/dividends.bson?raw=true"
     r = requests.get(url_div)
@@ -24,7 +27,7 @@ def read(filepath):
 def cache_factory(from_web, to_file, from_file, default_filename):
     def f(filename: str, directory: str, overwrite: bool = False):
         if not directory:
-            directory = Path(appdirs.user_cache_dir())
+            directory = str(local_directory())
         if not Path(directory).exists():
             raise FileNotFoundError(f"{directory} does not exist.")
         if not filename:

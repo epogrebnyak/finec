@@ -1,4 +1,5 @@
 import pandas as pd
+
 from finec.dividend import get_dividend, get_dividend_all
 from finec.moex import Stock
 
@@ -6,7 +7,7 @@ from finec.moex import Stock
 def test_mounted_get_dividend():
     df = Stock("GMKN").get_dividend()
     assert isinstance(df, pd.DataFrame)
-    assert len(df) >= 17
+    assert len(df) >= 16
 
 
 def test_get_dividend_all(tmpdir):

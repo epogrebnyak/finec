@@ -149,8 +149,12 @@ def find(query_str: str, is_traded=True):
     return get_all(endpoint="/iss/securities", param=param)["securities"]
 
 
-def describe(ticker: str):
+def describe_json(ticker: str):
     return get(f"/iss/securities/{ticker}")["description"]
+
+
+def whoami(ticker: str):
+    return {d["name"]: d["value"] for d in describe_json(ticker)}
 
 
 def board_dict(ticker: str):
@@ -248,6 +252,10 @@ class Board(Market):
         return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
 
 
+def stock_board(board="TQBR"):
+    return Board("stock", "shares", board)
+
+
 def securities(endpoint: str):  # not tested
     return get(endpoint + "/securities")
 
@@ -285,7 +293,7 @@ class Security:
     default_columns: ClassList = None
 
     def whoami(self):
-        return {d["name"]: d["value"] for d in describe(self.ticker)}
+        return whoami(self.ticker)
 
     @property
     def board_obj(self):
@@ -343,7 +351,7 @@ industries = dict(
 )
 
 
-def industry(ticker):
+def industry(ticker: str) -> str:
     d = {v: k for k, vs in industries.items() for v in vs.split()}
     return d.get(ticker, "not specified")
 

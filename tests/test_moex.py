@@ -268,6 +268,8 @@ def test_currency_history():
         }
     ]
 
+def test_industry():
+    assert moex.industry(ticker="HYDR") == "power"
 
 def test_index_history():
     assert moex.Index("IMOEX").get_history_json(
