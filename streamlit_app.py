@@ -2,30 +2,50 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from finec.moex import Index, industry, whoami
+from finec.moex import (
+    Index,
+    Stock,
+    industry,
+    whoami,
+    corporate_bonds,
+    bond_yields,
+)
 
 st.title("Акции, облигации и валюта - данные Московской биржи")
+
+#  Больше дат и номеров версий
 
 """
 [finec]: https://github.com/epogrebnyak/finec
 
 [![package version](https://badgen.net/pypi/v/finec)][finec]
+"""
 
-Что умеем делать:
+with st.expander("Комментарии", expanded=False):
+  """Что умеем делать:
 
-- получить данные Московской биржи по акциям, облигациям или валютам
-- преобразовать данные и объединить их с данными из других источников
-- построить графики 
-- скачать данные в формате CSV
+- получать данные Московской биржи по акциям, облигациям или валютам 
+  в машинночитаемом виде
+- строить графики 
+- предоставить данные для скачивания в формате CSV
+
+Что хотим делать:
+
+- объединить с данными из других источников (например, финансовая отчетность и макро)
+- данные зарубежных бирж
+- примеры в ноутбуке Google Colab 
+- контрольные вопросы для студентов
+- больше ссылкок на зеркальные страницы Мосбиржи
 
 Как работает:
 
-- выполняется на основе [открытого кода][finec]
+- выполняется на основе [открытого кода библиотеки finec][finec]
 - использует открытые данные Мосбиржи ([ISS MOEX](https://www.moex.com/a2193))
-- можно повторить расчеты в ноутбуке Google Colab 
+- показываем эту страницу через Streamlit Cloud
 
-Какие данные, графики или функционал вы бы хотели здесь видеть?
-Напишите в [ишью](https://github.com/epogrebnyak/finec/issues).
+Что добавить или изменить?
+
+- напишите мне в [ишью](https://github.com/epogrebnyak/finec/issues).
 """
 
 
@@ -59,7 +79,6 @@ def composition_df() -> pd.DataFrame:
 
 
 imoex_df = composition_df()
-button_donwload_csv(imoex_df, "imoex.csv")
 
 n_companies = st.slider(
     "Выберите количество компаний:",
@@ -93,26 +112,69 @@ c = (
 )
 
 st.altair_chart(c, use_container_width=True)
-st.dataframe(imoex_df.iloc[:n_companies, :])
+button_donwload_csv(imoex_df, "imoex.csv")
 
-st.subheader("Узнать про тикер")
+st.subheader("Как получить котировки акции по тикеру")
 
-random_ticker = "IRAO"  # imoex_df.sample(1).ticker.iloc[0]
-ticker = st.text_input("Введите тикер:", random_ticker)
+#    - Показать дивиденды
+#    - Показать последние цены и обороты
+#    - Сравнить с индексом Мосбиржи
+
+random_tickers = sorted(imoex_df.sample(5).ticker.to_list())
+st.write("Примеры тикеров:", ", ".join(random_tickers))
+
+ticker = st.text_input("Введите тикер и нажмите Enter:")
 if ticker:
-    describe_dict = whoami(ticker)
-    st.write(describe_dict["TYPENAME"], describe_dict["NAME"])
-    with st.expander("Больше информации", expanded=False):
-        st.write(describe_dict)
+    s = Stock(ticker)
+    desc_dict = s.whoami()
+    st.write(desc_dict["TYPENAME"], desc_dict["NAME"])
+    ticker_df = s.get_history()
+    st.line_chart(ticker_df["CLOSE"])
+    button_donwload_csv(ticker_df, "ticker.csv")
 
+"""Исторические данные по котировкам акций индекса Мосбиржи за 2013-2022 гг. 
+   можно также [скачать здесь.](https://raw.githubusercontent.com/epogrebnyak/finec/main/datasets/IMOEX_CLOSE.csv)
+"""
 
-# """Сколько компаний торгуется на Московской бирже?"""
+st.header("Облигации")
 
-# """По каким акциям идет наибольший объем торгов?"""
+#№with st.expander("Что добавить"):
+#    """
+#    - Нарисовать график цен и доходности отдельной облигации
+#    - Указывать на нем события
+#    - Нарисовать график доходности отдельной облигации
+#    """
 
-# Дата обновления
+st.subheader("Кривая доходности корпоративных облигаций")
 
+# Убрать несуществующие облигации
+# Добавить график доходностей и цен облигаций
 
-# st.header("Облигации")
+@st.cache
+def bond_yields_dafaframe():
+    b = corporate_bonds()
+    return bond_yields(b)
 
-# """По каким облигациям идет наибольший объем торгов?"""
+bonds_df = bond_yields_dafaframe()
+
+c2 = (
+    alt.Chart(bonds_df.query("TERM < 15").query("0 < EFFECTIVEYIELD < 60"))
+    .mark_circle(size=60)
+    .encode(
+        x=alt.X(
+            "TERM",
+            scale=alt.Scale(domain=(0, 15)),
+            axis=alt.Axis(title="Лет до погашения или оферты (TERM)"),
+        ),
+        y=alt.Y(
+            "EFFECTIVEYIELD",
+            scale=alt.Scale(domain=(0, 60)),
+            axis=alt.Axis(title="Доходность, % годовых (EFFECTIVEYIELD)"),
+        ),
+        tooltip=["SECID", "EFFECTIVEYIELD", "TERM"],
+    )
+    .configure_mark(opacity=0.2)
+)
+
+st.altair_chart(c2, use_container_width=True)
+button_donwload_csv(bonds_df, "yields.csv")

@@ -263,42 +263,36 @@ class Board(Market):
         return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
 
 
-def stocks_board(board: str) -> Board:
+def stocks(board: str = "TQBR") -> Board:
     return Markets.stocks.make_board(board)
 
 
-def bonds_board(board: str) -> Board:
+def bonds(board: str) -> Board:
     return Markets.bonds.make_board(board)
 
 
-def currencies_board(board) -> Board:
+def corporate_bonds():
+    return bonds("TQCB")
+
+
+def federal_bonds():
+    return bonds("TQOB")
+
+
+def currencies(board: str = "CETS") -> Board:
     return Markets.currency.make_board(board)
 
 
-def default_board_stocks():
-    return stocks_board("TQBR")
-
-
-def default_board_corporate_bonds():
-    return bonds_board("TQCB")
-
-
-def default_board_federal_bonds():
-    return bonds_board("TQOB")
-
-
-def default_board_currencies():
-    return currencies_board("CETS")
-
-
 def stock_prices():
-  # fmt: off
-  columns=['BOARDID', 'SHORTNAME', 'SECID', 
-           'OPEN', 'LOW', 'HIGH', 'CLOSE', 'WAPRICE',
-           'NUMTRADES', 'VALUE', 'VOLUME']
-  # fmt: on         
-  b = default_board_stocks()
-  return b.history().query("NUMTRADES>0")[columns]
+    # fmt: off
+    columns = [
+        "BOARDID", "SHORTNAME", "SECID",
+        "OPEN", "LOW", "HIGH", "CLOSE", "WAPRICE",
+        "NUMTRADES", "VALUE", "VOLUME"
+    ]
+    # fmt: on
+    b = stocks()
+    return b.history().query("NUMTRADES > 0")[columns]
 
 
 def bond_prices(b: Board) -> pd.DataFrame:
@@ -316,10 +310,16 @@ def bond_prices(b: Board) -> pd.DataFrame:
 
 
 def bond_yields(b: Board) -> pd.DataFrame:
-    return b.yields().drop(columns="IR ICPI BEI CBR SEQNUM".split())
+    df = b.yields().drop(columns="IR ICPI BEI CBR SEQNUM".split())
+    # Convert to data columns
+    for col in ["YIELDDATE", "ZCYCMOMENT"]:
+        df[col] = pd.to_datetime(df[col])
+    # Considering ZCYCMOMENT a proxy for trading date, may review
+    df["TERM"] = (df["YIELDDATE"] - df["ZCYCMOMENT"]).map(lambda x: x.days / 365)
+    return df
 
 
-def securities(endpoint: str):  # not tested
+def securities(endpoint: str):
     return get(endpoint + "/securities")
 
 

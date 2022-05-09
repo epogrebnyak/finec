@@ -2,14 +2,24 @@ from finec import moex
 
 
 def test_default_boards():
-    from finec.moex import Board, DEFAULT_BOARDS
+    from finec.moex import (
+        Board,
+        stocks,
+        corporate_bonds,
+        federal_bonds,
+        currencies,
+    )
 
-    assert DEFAULT_BOARDS == {
-        "stocks": Board(engine="stock", market="shares", board="TQBR"),
-        "corporate_bonds": Board(engine="stock", market="bonds", board="TQCB"),
-        "federal_bonds": Board(engine="stock", market="bonds", board="TQOB"),
-        "currencies": Board(engine="currency", market="selt", board="CETS"),
-    }
+    assert stocks() == Board(engine="stock", market="shares", board="TQBR")
+    assert corporate_bonds() == Board(engine="stock", market="bonds", board="TQCB")
+    assert federal_bonds() == Board(engine="stock", market="bonds", board="TQOB")
+    assert currencies() == Board(engine="currency", market="selt", board="CETS")
+
+
+def test_bond_prices_and_bond_yields():
+    b = moex.corporate_bonds()
+    assert len(moex.bond_prices(b)) > 0
+    assert len(moex.bond_yields(b)) > 0
 
 
 def find_by_secid():  # will expire
