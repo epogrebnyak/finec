@@ -291,6 +291,16 @@ def default_board_currencies():
     return currencies_board("CETS")
 
 
+def stock_prices():
+  # fmt: off
+  columns=['BOARDID', 'SHORTNAME', 'SECID', 
+           'OPEN', 'LOW', 'HIGH', 'CLOSE', 'WAPRICE',
+           'NUMTRADES', 'VALUE', 'VOLUME']
+  # fmt: on         
+  b = default_board_stocks()
+  return b.history().query("NUMTRADES>0")[columns]
+
+
 def bond_prices(b: Board) -> pd.DataFrame:
     # fmt: off
     columns = [
