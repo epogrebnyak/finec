@@ -68,10 +68,10 @@ cny_rur().ticker
 ### Lookup functions
 
 ```python
-from finec.moex import describe, find, traded_boards
+from finec.moex import whoami, find, traded_boards
 
 # General information about ticker
-describe("YNDX")
+whoami("YNDX")
 
 # What boards does a security trade at?
 traded_boards("MTSS")
