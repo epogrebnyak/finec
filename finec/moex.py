@@ -21,47 +21,6 @@ Tell more about securities:
   Stock("YNDX").whoami()
   Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
   find("Челябинский")
-
-
-User questions:
-
-- What classes of securities are available?
-  Stock, Bond, Index, Currency
-
-
-- What is the ticker list for this class of security (eg tickers for all traded stocks)?
-
-  Market("stock", "shares").securities().query('PREVWAPRICE > 0').SECID.unique().tolist()
-
-- What are the latest quotes for all securities of the class (eg all corporate bonds)?
-
-  Market("stock", "shares").securities()
-  Market("stock", "shares").history()
-
-- What is the quote history for a security (eg YNDX, AFLT, SBER, MTSS or RU000A101NJ6)?
-
-  status: implemented, tested
-
-Supplementary questions:
-
-- At what board a security is traded?
-
-  import finec.moex as moex
-  moex.traded_boards("MTSS")
-
-- What are the boards for each security class?
-
-  # not tested
-  moex.Market("stock", "shares").boards()
-
-Unanswered:
-
-- How can I get a nice dataset of the bonds market yields and durations?
-- Can MOEX bond yield calculation be trusted?
-- Why do column lists differ across endpoints?
-- Can issuer ticker be linked to company tax number?
-- Are government bonds included in TQCB board?
-- Why are there so many boards?
 """
 
 from dataclasses import dataclass, field
@@ -76,19 +35,15 @@ from finec.dividend import get_dividend
 
 __all__ = [
     "find",
-    "describe",
+    "whoami",
     "traded_boards",
     "Stock",
     "Index",
     "Bond",
     "Currency",
-    "get_stocks",
-    "get_bonds",
-    "get_bond_yields",
-    "get_currencies",
-    "usd_rur",
-    "eur_rur",
-    "cny_rur",
+    "CURRENCIES",
+    "MARKETS",
+    "BOARDS",
 ]
 
 
@@ -191,8 +146,31 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
     return df
 
 
+def engines() -> Dict:
+    return {d["name"]: d["title"] for d in get("/iss/engines/")["engines"]}
+
+
 @dataclass
-class Market:
+class Engine:
+    engine: str
+
+    def market(self, market):
+        return Market(self.engine, market)
+
+    @property
+    def endpoint(self):
+        return f"/iss/engines/{self.engine}"
+
+    def describe(self):
+        return get(self.endpoint)
+
+    def markets(self) -> Dict:
+        ds = get(self.endpoint + "/markets")["markets"]
+        return {d["NAME"]: d["title"] for d in ds}
+
+
+@dataclass
+class Market(Engine):
     engine: str
     market: str
 
@@ -200,12 +178,25 @@ class Market:
     def endpoint(self):
         return f"/iss/engines/{self.engine}/markets/{self.market}"
 
-    @property
-    def history_endpoint(self):
-        return f"/iss/history/engines/{self.engine}/markets/{self.market}"
+    def boards(self) -> List:
+        return [d["boardid"] for d in self.describe()["boards"]]
 
-    def describe(self):
-        return get(self.endpoint)
+    def traded_boards(self) -> List:
+        return [d["boardid"] for d in self.describe()["boards"] if d["is_traded"]]
+
+    def volumes(self) -> pd.DataFrame:
+        return (
+            self.history()[["BOARDID", "VALUE"]]
+            .groupby("BOARDID")
+            .sum()
+            .divide(1e6)
+            .round(1)
+            .query("VALUE != 0")
+            .VALUE.sort_values(ascending=False)
+        )
+
+    def board(self, board: str):
+        return Board(self.engine, self.market, board)
 
     def securities(self) -> pd.DataFrame:
         # /securities endpoint returns dict with following keys:
@@ -216,36 +207,30 @@ class Market:
         #  marketdata_yields is non-empty for bonds- returned by yields
         return dataframe(get(self.endpoint + "/securities")["securities"])
 
+    def tickers(self) -> List[str]:
+        return self.securities()["SECID"].unique().tolist()
+
     def yields(self) -> pd.DataFrame:
         return dataframe(get(self.endpoint + "/securities")["marketdata_yields"])
 
-    # Note: very slow method, usage not recommended
+    @property
+    def history_endpoint(self):
+        return f"/iss/history/engines/{self.engine}/markets/{self.market}"
+
     def history_json(self) -> List:
         return get_all(self.history_endpoint + "/securities")["history"]
 
-    # Note: very slow method, usage not recommended
     def history(self) -> pd.DataFrame:
         return dataframe(self.history_json())
-
-    def make_board(self, board: str):
-        return Board(self.engine, self.market, board)
-
-    def boards_json(self) -> List:
-        return get(self.endpoint + "/boards")["boards"]
-
-    def all_boards(self):
-        return {d["boardid"]: d["title"] for d in self.boards_json()}
-
-    def traded_boards(self):
-        return {
-            d["boardid"]: d["title"] for d in self.boards_json() if d["is_traded"] == 1
-        }
 
 
 class Markets:
     stocks = Market("stock", "shares")
     bonds = Market("stock", "bonds")
     currency = Market("currency", "selt")
+
+
+MARKETS = [Markets.stocks, Markets.bonds, Markets.currency]
 
 
 @dataclass
@@ -263,36 +248,52 @@ class Board(Market):
         return f"/iss/history/engines/{self.engine}/markets/{self.market}/boards/{self.board}"
 
 
-def stocks(board: str = "TQBR") -> Board:
-    return Markets.stocks.make_board(board)
+def stocks_board(board: str = "TQBR") -> Board:
+    return Markets.stocks.board(board)
 
 
-def bonds(board: str) -> Board:
-    return Markets.bonds.make_board(board)
+def bonds_board(board: str) -> Board:
+    return Markets.bonds.board(board)
 
 
-def corporate_bonds():
-    return bonds("TQCB")
+def corporate_bonds_board() -> Board:
+    return bonds_board("TQCB")
 
 
-def federal_bonds():
-    return bonds("TQOB")
+def federal_bonds_board() -> Board:
+    return bonds_board("TQOB")
 
 
-def currencies(board: str = "CETS") -> Board:
-    return Markets.currency.make_board(board)
+def currencies_board(board: str = "CETS") -> Board:
+    return Markets.currency.board(board)
 
 
-def stock_prices():
+BOARDS = [
+    stocks_board(),
+    corporate_bonds_board(),
+    federal_bonds_board(),
+    currencies_board(),
+]
+
+
+def stock_prices(b: Board):
     # fmt: off
     columns = [
-        "BOARDID", "SHORTNAME", "SECID",
+        "BOARDID", "SECID", "SHORTNAME", 
         "OPEN", "LOW", "HIGH", "CLOSE", "WAPRICE",
         "NUMTRADES", "VALUE", "VOLUME"
     ]
     # fmt: on
-    b = stocks()
-    return b.history().query("NUMTRADES > 0")[columns]
+    return (
+        b.history()
+        .query("NUMTRADES > 0")[columns]
+        .sort_values("VALUE", ascending=False)
+    )
+
+
+def stocks_dataframe():
+    b = stocks_board()
+    return stock_prices(b)
 
 
 def bond_prices(b: Board) -> pd.DataFrame:
@@ -311,12 +312,18 @@ def bond_prices(b: Board) -> pd.DataFrame:
 
 def bond_yields(b: Board) -> pd.DataFrame:
     df = b.yields().drop(columns="IR ICPI BEI CBR SEQNUM".split())
-    # Convert to data columns
+    # Convert to date columns
     for col in ["YIELDDATE", "ZCYCMOMENT"]:
         df[col] = pd.to_datetime(df[col])
     # Considering ZCYCMOMENT a proxy for trading date, may review
     df["TERM"] = (df["YIELDDATE"] - df["ZCYCMOMENT"]).map(lambda x: x.days / 365)
     return df
+
+
+def bonds_dataframe():
+    b = corporate_bonds_board()
+    df = bond_prices(b)
+    return df.merge(bond_yields(b), how="left", on="SECID")
 
 
 def securities(endpoint: str):
@@ -388,6 +395,7 @@ class Stock(Security):
     market: str = default("shares")
     default_columns: ClassList = [
         "TRADEDATE",
+        "SECID",
         "BOARDID",
         "CLOSE",
         "WAPRICE",
@@ -428,6 +436,7 @@ class Bond(Security):
     default_columns: ClassList = [
         "TRADEDATE",
         "BOARDID",
+        "SECID",
         "CLOSE",
         "YIELDCLOSE",
         "NUMTRADES",
@@ -455,8 +464,10 @@ class Index(Security):
     default_columns: ClassList = None
 
     def composition(self):
-        # Implemented as in https://github.com/WLM1ke/apimoex/issues/12
-        # On web see https://www.moex.com/ru/index/IMOEX/constituents/
+        """
+        Implemented as in https://github.com/WLM1ke/apimoex/issues/12
+        See https://www.moex.com/ru/index/IMOEX/constituents/
+        """
         endpoint = (
             f"/iss/statistics/engines/stock/markets/index/analytics/{self.ticker}"
         )
@@ -477,16 +488,11 @@ class Currency(Security):
     default_columns: ClassList = None
 
 
-def usd_rur():
-    return Currency("USD000UTSTOM")
-
-
-def eur_rur():
-    return Currency("EUR_RUB__TOM")
-
-
-def cny_rur():
-    return Currency("CNYRUB_TOM")
+CURRENCIES = dict(
+    USDRUR=Currency("USD000UTSTOM"),
+    EURRUR=Currency("EUR_RUB__TOM"),
+    CNYRUR=Currency("CNYRUB_TOM"),
+)
 
 
 def get_bonds_market():

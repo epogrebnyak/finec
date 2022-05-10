@@ -5,7 +5,6 @@ import bson
 import pandas as pd
 import requests
 
-
 from finec.directory import local_directory
 
 

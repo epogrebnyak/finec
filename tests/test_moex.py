@@ -1,23 +1,47 @@
 from finec import moex
 
 
+def test_engine():
+    assert moex.Engine("stock").markets() == {
+        "index": "Индексы фондового рынка",
+        "shares": "Рынок акций",
+        "bonds": "Рынок облигаций",
+        "ndm": "Режим переговорных сделок",
+        "otc": "ОТС",
+        "ccp": "РЕПО с ЦК",
+        "deposit": "Депозиты с ЦК",
+        "repo": "Рынок сделок РЕПО",
+        "qnv": "Квал. инвесторы",
+        "mamc": "Мультивалютный рынок смешанных активов",
+        "foreignshares": "Иностранные ц.б.",
+        "foreignndm": "Иностранные ц.б. РПС",
+        "moexboard": "MOEX Board",
+        "gcc": "РЕПО с ЦК с КСУ",
+        "credit": "Рынок кредитов",
+        "standard": "Standard",
+        "classica": "Classica",
+    }
+
+
 def test_default_boards():
     from finec.moex import (
         Board,
-        stocks,
-        corporate_bonds,
-        federal_bonds,
-        currencies,
+        corporate_bonds_board,
+        currencies_board,
+        federal_bonds_board,
+        stocks_board,
     )
 
-    assert stocks() == Board(engine="stock", market="shares", board="TQBR")
-    assert corporate_bonds() == Board(engine="stock", market="bonds", board="TQCB")
-    assert federal_bonds() == Board(engine="stock", market="bonds", board="TQOB")
-    assert currencies() == Board(engine="currency", market="selt", board="CETS")
+    assert stocks_board() == Board(engine="stock", market="shares", board="TQBR")
+    assert corporate_bonds_board() == Board(
+        engine="stock", market="bonds", board="TQCB"
+    )
+    assert federal_bonds_board() == Board(engine="stock", market="bonds", board="TQOB")
+    assert currencies_board() == Board(engine="currency", market="selt", board="CETS")
 
 
 def test_bond_prices_and_bond_yields():
-    b = moex.corporate_bonds()
+    b = moex.corporate_bonds_board()
     assert len(moex.bond_prices(b)) > 0
     assert len(moex.bond_yields(b)) > 0
 
@@ -253,7 +277,7 @@ def test_market_methods():
 
 
 def test_market_traded_boards():
-    assert list(moex.Market("stock", "shares").traded_boards().keys()) == [
+    assert moex.Market("stock", "shares").traded_boards() == [
         "SMAL",
         "SPEQ",
         "TQBR",
@@ -322,7 +346,9 @@ def test_index_history():
 
 
 def test_usd_rur():
-    assert moex.usd_rur().get_history_json(start="2003-04-15", end="2003-04-15") == [
+    assert moex.CURRENCIES["USDRUR"].get_history_json(
+        start="2003-04-15", end="2003-04-15"
+    ) == [
         {
             "BOARDID": "CETS",
             "TRADEDATE": "2003-04-15",

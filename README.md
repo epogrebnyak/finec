@@ -5,7 +5,7 @@
 
 Financial data and financial computation utilities for Finec MGIMO students.
 
-## Demo
+## Demo application
 
 <https://share.streamlit.io/epogrebnyak/finec/main>
 
@@ -17,8 +17,7 @@ pip install git+https://github.com/epogrebnyak/finec.git
 
 ## Moscow Exchange (MOEX)
 
-Download Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices 
-and pandas dataframes, CSV or Excel files.
+Download Moscow Exchange (MOEX) data for stocks, bonds, currencies and indices as pandas dataframes, CSV or Excel files.
 
 ### Stocks
 
@@ -56,14 +55,15 @@ Bond(ticker="RU000A101NJ6", board="TQIR").provided_columns()
 ### Currencies
 
 ```python
-from finec.moex import Currency, usd_rur, eur_rur, cny_rur
+from finec.moex import Currency, CURRENCIES
 
-# USDRUR exchange rate
-Currency("USD000UTSTOM").get_history(start="2020-01-01")
+# Tickers for usd, euro and yuan exchange rates
+USDRUR = Currency(ticker='USD000UTSTOM', board='CETS')
+EURRUR = Currency(ticker='EUR_RUB__TOM', board='CETS')
+CNYRUR = Currency(ticker='CNYRUB_TOM', board='CETS')
 
-# Tickers for euro and yuan exchange rates
-eur_rur().ticker
-cny_rur().ticker
+# USDRUR exchange rate starting 2020
+USDRUR.get_history(start="2020-01-01")
 ```
 
 ### Lookup functions
@@ -90,7 +90,14 @@ m = Market(engine="stock", market="shares")
 m.traded_boards()
 
 b = Board(engine="stock", market="shares", board="TQBR")
+
+# trading volumes by board
+b.volumes()
+
+# securitites list
 b.securities()
+
+# last trading day quotes
 b.history()
 ```
 
