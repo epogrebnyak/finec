@@ -1,6 +1,6 @@
 package := "finec"
 
-# list available commands
+# list available commands (default option to just)
 list:
   just --list
   
