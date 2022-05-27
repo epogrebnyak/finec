@@ -36,6 +36,7 @@ from finec.dividend import get_dividend
 __all__ = [
     "find",
     "whoami",
+    "all_boards",
     "traded_boards",
     "Stock",
     "Index",
@@ -73,28 +74,28 @@ def get_all(endpoint, param={}):
         return ISSClient(session, qualified(endpoint), param).get_all()
 
 
-@dataclass
-class Query:
-    endpoint: str
-    param: dict = field(default_factory=dict)
+# @dataclass
+# class Query:
+#     endpoint: str
+#     param: dict = field(default_factory=dict)
 
-    def __post_init__(self):
-        assert_endpoint(self.endpoint)
+#     def __post_init__(self):
+#         assert_endpoint(self.endpoint)
 
-    @property
-    def url(self):
-        return qualified(self.endpoint)
+#     @property
+#     def url(self):
+#         return qualified(self.endpoint)
 
-    def client(self, session):
-        return ISSClient(session, self.url, self.param)
+#     def client(self, session):
+#         return ISSClient(session, self.url, self.param)
 
-    def get(self):
-        with requests.Session() as session:
-            return self.client(session).get()
+#     def get(self):
+#         with requests.Session() as session:
+#             return self.client(session).get()
 
-    def get_all(self):
-        with requests.Session() as session:
-            return self.client(session).get_all()
+#     def get_all(self):
+#         with requests.Session() as session:
+#             return self.client(session).get_all()
 
 
 def find(query_str: str, is_traded=True):
@@ -201,10 +202,10 @@ class Market(Engine):
     def securities(self) -> pd.DataFrame:
         # /securities endpoint returns dict with following keys:
         # ['securities', 'marketdata', 'dataversion', 'marketdata_yields']
-        #  securities - returned by this method
-        #  marketdata is not meaningful data
-        #  dataversion is a timestamp
-        #  marketdata_yields is non-empty for bonds- returned by yields
+        # - 'securities' is returned by this method
+        # - 'marketdata' is not meaningful data
+        # - 'dataversion' is a timestamp
+        # - 'marketdata_yields' is non-empty for bonds- returned by yields
         return dataframe(get(self.endpoint + "/securities")["securities"])
 
     def tickers(self) -> List[str]:
