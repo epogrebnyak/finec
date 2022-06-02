@@ -361,6 +361,11 @@ class Security:
     def get_history(self, columns=[], start="", end=""):
         return dataframe(self.get_history_json(columns, start, end))
 
+    def get_candles(self, interval=24, columns=[], start="", end=""):
+        # "https://iss.moex.com/iss/engines/{engine}/markets/{market}/"
+        # f"boards/{board}/securities/{security}/candles.json"
+        pass
+
 
 @dataclass
 class Stock(Security):
