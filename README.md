@@ -81,10 +81,10 @@ traded_boards("MTSS")
 find(query_str="Челябинский", is_traded=True)
 ```
 
-### Markets and boards
+### Engines, markets and boards
 
 ```python
-from finec.moex import Market, Board
+from finec.moex import list_engines, Engine, Market, Board
 
 m = Market(engine="stock", market="shares")
 m.traded_boards()
