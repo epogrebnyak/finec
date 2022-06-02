@@ -118,7 +118,7 @@ Notes:
 
 - MOEX is very generious to provide a lot of data for free and without any registration or tokens.
 - MOEX API provided on "as is" basis and some parts are undocumented.
-- Jube 2022: MOEX statistics server not available for queries from Google Colab or Github Actions:
+- June 2022: MOEX statistics server not available for queries from Google Colab or Github Actions:
   - must use local installation for development
   - all remote tests on CI fail
   - streamlit cloud does not start 
