@@ -84,7 +84,13 @@ find(query_str="Челябинский", is_traded=True)
 ### Engines, markets and boards
 
 ```python
-from finec.moex import list_engines, Engine, Market, Board
+from finec.moex import get_engines, Engine, Market, Board
+
+engines = get_engines()
+print(engines)
+
+e = Engine("forts")
+e.markets()
 
 m = Market(engine="stock", market="shares")
 m.traded_boards()
@@ -94,10 +100,10 @@ b = Board(engine="stock", market="shares", board="TQBR")
 # trading volumes by board
 b.volumes()
 
-# securitites list
+# list securitites by board
 b.securities()
 
-# last trading day quotes
+# last trading day quotes by board
 b.history()
 ```
 
