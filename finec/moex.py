@@ -36,8 +36,6 @@ from finec.dividend import get_dividend
 __all__ = [
     "find",
     "whoami",
-    "all_boards",
-    "traded_boards",
     "Stock",
     "Index",
     "Bond",
@@ -72,30 +70,6 @@ def get_all(endpoint, param={}):
     assert_endpoint(endpoint)
     with requests.Session() as session:
         return ISSClient(session, qualified(endpoint), param).get_all()
-
-
-# @dataclass
-# class Query:
-#     endpoint: str
-#     param: dict = field(default_factory=dict)
-
-#     def __post_init__(self):
-#         assert_endpoint(self.endpoint)
-
-#     @property
-#     def url(self):
-#         return qualified(self.endpoint)
-
-#     def client(self, session):
-#         return ISSClient(session, self.url, self.param)
-
-#     def get(self):
-#         with requests.Session() as session:
-#             return self.client(session).get()
-
-#     def get_all(self):
-#         with requests.Session() as session:
-#             return self.client(session).get_all()
 
 
 def find(query_str: str, is_traded=True):
@@ -147,7 +121,7 @@ def dataframe(json_dict: Dict) -> pd.DataFrame:
     return df
 
 
-def engines() -> Dict:
+def get_engines() -> Dict:
     return {d["name"]: d["title"] for d in get("/iss/engines/")["engines"]}
 
 
