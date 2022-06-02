@@ -198,6 +198,13 @@ class Market(Engine):
     def history(self) -> pd.DataFrame:
         return dataframe(self.history_json())
 
+    def volume(self) -> int:
+        try:
+          return self.history()["VOLUME"].sum()    
+        except KeyError:
+          return None
+
+
 
 class Markets:
     stocks = Market("stock", "shares")

@@ -28,3 +28,19 @@ class Futures(Security):
 
 #%%
 Futures("SiM2").get_history().dropna()
+
+#%%
+from finec.moex import get_engines, Board, Engine, Market
+
+for e in get_engines():
+    for m in Engine(e).markets():
+        for b_name in Market(e, m).traded_boards():
+            b = Board(e, m, b_name)
+            v = b.volume()
+            if v:
+               print(b, v)
+               b.__dict__
+
+# need: Board.volume()
+
+# %%

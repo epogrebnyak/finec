@@ -26,14 +26,17 @@ from finec.moex import (
     bond_prices,
     bond_yields,
     corporate_bonds_board,
-    engines,
+    get_engines,
     stock_prices,
     stocks_board,
     whoami,
 )
 
+#%%
 # Какие торговые системы (engines) существуют на бирже?
-engines()
+for e in get_engines():
+    print(e)
+
 
 # %%
 # Какие рынки (markets) есть для торговой системы ("движка") "stock"?
