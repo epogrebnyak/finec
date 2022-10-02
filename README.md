@@ -18,6 +18,12 @@ Financial data and financial computation utilities.
 ## Installation
 
 ```console
+pip install finec
+```
+
+or 
+
+```console
 pip install git+https://github.com/epogrebnyak/finec.git
 ```
 
@@ -120,7 +126,7 @@ from finec.yield_curve import YieldCurve, get_yields_from_cbr
 
 y = YieldCurve("2022-09-28")
 r1 = y.rate(t=1)
-# 830.2383903307176
+# 830.2383903307176 (basis points)
 
 rs = get_yields_from_cbr("2022-09-28")
 # {'0.25': 8.2, '0.50': 8.19, '0.75': 8.23, '1.00': 8.3, '2.00': 8.74, '3.00': 9.22, '5.00': 9.91, 
