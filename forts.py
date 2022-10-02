@@ -38,8 +38,8 @@ for e in get_engines():
             b = Board(e, m, b_name)
             v = b.volume()
             if v:
-               print(b, v)
-               b.__dict__
+                print(b, v)
+                b.__dict__
 
 # need: Board.volume()
 

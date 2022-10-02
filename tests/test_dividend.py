@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 
 from finec.dividend import get_dividend, get_dividend_all
@@ -11,12 +12,12 @@ def test_mounted_get_dividend():
 
 
 def test_get_dividend_all(tmpdir):
-    df1 = get_dividend_all(str(tmpdir), "div.csv", overwrite=False)
+    df1 = get_dividend_all(Path(tmpdir) / "div.csv")
     assert len(df1) >= 2387
 
 
 def test_get_dividend(tmpdir):
-    df2 = get_dividend("AFLT", str(tmpdir), "div.csv", overwrite=True)
+    df2 = get_dividend("AFLT", Path(tmpdir) / "div.csv")
     assert len(df2) >= 3
 
 

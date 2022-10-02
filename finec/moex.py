@@ -200,10 +200,9 @@ class Market(Engine):
 
     def volume(self) -> int:
         try:
-          return self.history()["VOLUME"].sum()    
+            return self.history()["VOLUME"].sum()
         except KeyError:
-          return None
-
+            return None
 
 
 class Markets:
