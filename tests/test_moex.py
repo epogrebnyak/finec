@@ -209,6 +209,7 @@ def test_bond_history():
 def test_whoami():
     res_dict = moex.Bond("RU000A0JXN21").whoami()
     del res_dict["DAYSTOREDEMPTION"]
+    del res_dict["COUPONDATE"]
     assert res_dict == {
         "SECID": "RU000A0JXN21",
         "NAME": 'АФК "Система" ПАО БО-001P-06',
@@ -231,7 +232,8 @@ def test_whoami():
         "FACEVALUE": "1000",
         "ISQUALIFIEDINVESTORS": "0",
         "COUPONFREQUENCY": "2",
-        "COUPONDATE": "2022-09-30",
+        # This changes over time, so we delete field from comparison
+        # "COUPONDATE": "2022-09-30",
         "COUPONPERCENT": "17",
         "COUPONVALUE": "84.77",
         "TYPENAME": "Биржевая облигация",
@@ -242,36 +244,50 @@ def test_whoami():
     }
 
 
+# %%
+from finec import moex
+
+res = set(moex.traded_boards("AFLT").keys())
+print(res)
+
+# %%
+
+
 def test_traded_boards():
     res = set(moex.traded_boards("AFLT").keys())
-    if "SOTC" in res:
-        res.remove("SOTC")
-    assert res == set(
-        [
-            "TQBR",
-            "SPEQ",
-            "SMAL",
-            "TQDP",
-            "RPMO",
-            "PTEQ",
-            "PSEQ",
-            "RPEU",
-            "RPEO",
-            "EQRD",
-            "EQRE",
-            "EQWP",
-            "EQWD",
-            "EQWE",
-            "EQRP",
-            "LIQR",
-            "EQRY",
-            "PSRY",
-            "PSRP",
-            "PSRD",
-            "PSRE",
-            "LIQB",
-        ]
-    )
+    assert res == {
+        "EQRE",
+        "CTEQ",
+        "CIQB",
+        "SPEQ",
+        "EQWE",
+        "LIQR",
+        "RPEO",
+        "PTEQ",
+        "CPEO",
+        "RPEY",
+        "PSRD",
+        "CIQR",
+        "TQDP",
+        "RPMO",
+        "CPEY",
+        "LIQB",
+        "EQWD",
+        "PSRY",
+        "PSRP",
+        "PSRE",
+        "SMAL",
+        "TQBR",
+        "EQWY",
+        "EQWP",
+        "RPEU",
+        "EQRD",
+        "CPMO",
+        "CPEU",
+        "EQRP",
+        "EQRY",
+        "PSEQ",
+    }
 
 
 def test_market_methods():
@@ -380,6 +396,7 @@ def test_index_composition():
     }
 
 
+# %%
 def test_index_tickers():
     assert sorted(moex.Index("IMOEX").tickers()) == [
         "AFKS",
@@ -389,13 +406,11 @@ def test_index_tickers():
         "CHMF",
         "DSKY",
         "ENPG",
-        "FEES",
         "FIVE",
         "FIXP",
         "GAZP",
         "GLTR",
         "GMKN",
-        "HHRU",
         "HYDR",
         "IRAO",
         "LKOH",
@@ -409,7 +424,6 @@ def test_index_tickers():
         "PHOR",
         "PIKK",
         "PLZL",
-        "POGR",
         "POLY",
         "ROSN",
         "RTKM",
