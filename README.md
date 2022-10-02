@@ -1,15 +1,15 @@
 <!--
 
 Server unavailable outside Russia
-[![Tests](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml/badge.svg)](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml)
 
 -->
 
+[![Tests](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml/badge.svg)](https://github.com/epogrebnyak/finec/actions/workflows/.pytest.yml)
 [![Finec version](https://badgen.net/pypi/v/finec)](https://pypi.org/project/finec/)
 
 # finec
 
-Financial data and financial computation utilities for Finec MGIMO students.
+Financial data and financial computation utilities.
 
 ## Demo application
 
