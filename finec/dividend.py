@@ -40,10 +40,9 @@ def default_filepath():
 
 
 def get_dividend_all(filepath: str = ""):
-    if filepath == "":
-        filepath = default_filepath()
-    if filepath.exists():
-        return read(filepath)
+    filepath_ = Path(filepath) if filepath else default_filepath()
+    if filepath_.exists():
+        return read(filepath_)
     else:
         df = query_dividend_from_web()
         save(df, filepath)

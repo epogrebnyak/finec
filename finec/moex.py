@@ -109,7 +109,7 @@ def history_endpoint(engine, market, board="", ticker=""):
     return endpoint("/iss/history", engine, market, board, ticker)
 
 
-def dataframe(json_dict: Dict) -> pd.DataFrame:
+def dataframe(json_dict) -> pd.DataFrame:
     df = pd.DataFrame(json_dict)
     if "TRADEDATE" in df.columns:
         df["TRADEDATE"] = pd.to_datetime(df["TRADEDATE"])
@@ -198,7 +198,7 @@ class Market(Engine):
     def history(self) -> pd.DataFrame:
         return dataframe(self.history_json())
 
-    def volume(self) -> int:
+    def volume(self) -> Optional[int]:
         try:
             return self.history()["VOLUME"].sum()
         except KeyError:
