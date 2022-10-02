@@ -24,9 +24,6 @@ def query_dividend_from_web(url=DIVIDEND_URL) -> pd.DataFrame:
     return pd.DataFrame(gen)
 
 
-# %%
-
-
 def save(df, filepath: str):
     df.to_csv(filepath, index=False)
 
@@ -49,15 +46,18 @@ def get_dividend_all(filepath: str = ""):
         return df
 
 
-def get_dividend(ticker="", filepath: str = ""):
-    """Return dividend information from WLM1ke/poptimizer as dataframe.
-       Subset by *ticker*, if *ticker* is provided.
+def erase_local_file():
+    # FIXME: must delete default_filepath().
+    pass
+
+
+def get_dividend(ticker: str, filepath: str = ""):
+    """Return dividend for *ticker* from WLM1ke/poptimizer as dataframe.
 
     Caching:
-      - Uses cached data *directory/filename*.
-      - Will read from local *directory/filename*, if exists.
-      - If *directory/filename* does not exist will download data
-        and save it to *directory/filename*.
+      - Uses cached data at *filepath*. Will read from *filepath*, if exists.
+      - If *filepath* does not exist will download data and save it to *filepath*.
+      - Uses default location otherwise.
 
     Example:
 
