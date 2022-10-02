@@ -18,6 +18,7 @@ appdirs = "^1.4.4"
 httpx = "^0.22.0"
 python-dotenv = "^0.20.0"
 matplotlib = "^3.5.2"
+lxml = "^4.9.1"
 
 
 [tool.poetry.dev-dependencies]
