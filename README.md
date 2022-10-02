@@ -113,6 +113,20 @@ b.securities()
 b.history()
 ```
 
+### Yield curves
+
+```python
+from finec.yield_curve import YieldCurve, get_yields_from_cbr
+
+y = YieldCurve("2022-09-28")
+r1 = y.rate(t=1)
+# 830.2383903307176
+
+rs = get_yields_from_cbr("2022-09-28")
+# {'0.25': 8.2, '0.50': 8.19, '0.75': 8.23, '1.00': 8.3, '2.00': 8.74, '3.00': 9.22, '5.00': 9.91, 
+#  '7.00': 10.27, '10.00': 10.5, '15.00': 10.69, '20.00': 10.8, '30.00': 10.9}
+```
+
 ### More about MOEX data
 
 References:
