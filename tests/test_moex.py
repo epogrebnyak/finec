@@ -20,6 +20,9 @@ def test_engine():
         "credit": "Рынок кредитов",
         "standard": "Standard",
         "classica": "Classica",
+        "nonresccp": "Рынок РЕПО с ЦК (нерезиденты)",
+        "nonresndm": "Режим переговорных сделок (нерезиденты)",
+        "nonresrepo": "Рынок РЕПО (нерезиденты)",
     }
 
 
