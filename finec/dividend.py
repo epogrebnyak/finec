@@ -37,15 +37,23 @@ def default_filepath():
 
 
 def get_dividend_all(filepath: str = ""):
-    filepath_ = Path(filepath) if filepath else default_filepath()
-    if filepath_.exists():
-        return read(filepath_)
+    if filepath == "":
+        path = default_filepath()
+    else:
+        path = Path(filepath)
+    if path.exists():
+        return read(path)
     else:
         df = query_dividend_from_web()
-        save(df, filepath)
+        save(df, path)
         return df
 
+#%%
 
+get_dividend_all("")
+
+
+#%%
 def erase_local_file():
     # FIXME: must delete default_filepath().
     pass
