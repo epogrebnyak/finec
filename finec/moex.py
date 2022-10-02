@@ -46,6 +46,39 @@ __all__ = [
 ]
 
 
+#%%
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Endpoint:
+    locator: str
+
+    def __post_init__(self):
+        if not self.locator.startswith("/iss"):
+            raise ValueError(f"{self.locator} must start with '/iss'.")
+
+    @property
+    def qualified(self):
+        return "https://iss.moex.com" + self.locator + ".json"
+
+    def get_with(self, func_name: str, param: Dict = {}):
+        with requests.Session() as session:
+            client = ISSClient(session, self.qualified, param)
+            caller = getattr(client, func_name)
+            return caller()
+
+    def get(self, param: Dict = {}):
+        return self.get_with("get", param)
+
+    def get_all(self, param: Dict = {}):
+        return self.get_with("get_all", param)
+
+
+#%%
+
+
 def assert_date(s: str) -> str:
     # date must be in YYYY-MM-DD format, passes now without check
     return s
