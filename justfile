@@ -1,47 +1,47 @@
 package := "finec"
 
-# list available commands (default option to just)
+# List available commands (default option to just)
 list:
   just --list
   
-# publish to PyPI
+# Publish package to PyPI
 publish:
   export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
   poetry publish 
 
-# run code from README
+# Run code from README
 readme:
   cat README.md | codedown python | poetry run python 
 
-# format markdown
-prettier:
+# Format markdown
+pretty:
   npx prettier --write .
 
 # launch streamlit app
 app:
-  poetry run streamlit run streamlit_app.py
+  poetry run streamlit run app/streamlit_app.py
 
-# black and isort
+# Run black and isort
 lint:  
    black .
    isort .
 
-# run tests
+# Run tests
 test:
   poetry run pytest
 
-# build documentation 
-docs:
+# Build documentation 
+docs-build:
   poetry run sphinx-build -a docs docs/site
 
-# show documentation in browser
-show:
+# Show documentation in browser
+docs-show:
   start docs/site/index.html
 
-# publish documentation to Github Pages
-pages:
+# Publish documentation to Github Pages
+docs-publish:
   poetry run ghp-import docs/site 
 
-# create rst source for API documentation
-apidoc:
-  sphinx-apidoc -o docs src/{{package}}
+# Create rst source for API documentation
+docs-apidoc:
+  sphinx-apidoc -o docs {{package}}
