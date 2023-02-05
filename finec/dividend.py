@@ -48,6 +48,7 @@ def get_dividend_all(filepath: str = ""):
         save(df, path)
         return df
 
+
 #%%
 
 get_dividend_all("")

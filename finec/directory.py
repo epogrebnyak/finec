@@ -9,5 +9,4 @@ def local_directory() -> Path:
 
 
 #%%
-print(local_directory()) 
-
+print(local_directory())
