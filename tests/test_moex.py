@@ -244,15 +244,6 @@ def test_whoami():
     }
 
 
-# %%
-from finec import moex
-
-res = set(moex.traded_boards("AFLT").keys())
-print(res)
-
-# %%
-
-
 def test_traded_boards():
     res = set(moex.traded_boards("AFLT").keys())
     assert res == {
@@ -306,10 +297,14 @@ def test_market_traded_boards():
         "TQIF",
         "TQPD",
         "TQPE",
+        "TQPH",
         "TQPI",
+        "TQPY",
         "TQTD",
         "TQTE",
         "TQTF",
+        "TQTH",
+        "TQTY",
     ]
 
 
